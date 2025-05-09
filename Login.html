@@ -1,0 +1,26 @@
+<!DOCTYPE html>
+<html lang="en-US">
+<head>
+    <title>CitySurfer Login</title>
+</head>
+<body>
+    <h1>Login to your existing Account</h1>
+    <form action="/login" method="POST">
+        <label for="username">Username:</label>
+        <input type="text" id="username" name="username" required><br><br>
+
+        <label for="password">Password:</label>
+        <input type="password" id="password" name="password" required><br><br>
+
+        <button type="submit">Login</button>
+        <button type="button" onclick="document.location='Register.html'">Register</button>
+    </form>
+<!-- Example for signup.html -->
+</body>
+</html>
+<!-- Include your page-specific script as a module -->
+<!-- The 'defer' attribute is automatic for type="module", but including it doesn't hurt -->
+<script type="module" src="/js/login.js" defer></script>
+</body>
+
+</html>
