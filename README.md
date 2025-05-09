@@ -9,3 +9,6 @@ How it works (hopefully :D):
 5. Explore the city together!
 6. Leave a review for your guide and your guide will leave one for you!
 7. If you loved it, maybe schedule another one!
+
+Future updates:
+A discover feed for updates by local guides and travelers.
