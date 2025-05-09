@@ -2,5 +2,18 @@
   "dependencies": {
     "@firebasegen/default-connector": "file:dataconnect-generated/js/default-connector",
     "dotenv": "^16.5.0"
-  }
+  },
+  "name": "citysurfer",
+  "description": "In a new city and want to make a local friend while also getting a view of the unique delights and customs of the city? CitySurfer is an app that can match you with locals who you can spend a day with.",
+  "version": "1.0.0",
+  "main": "firebaseConfig.js",
+  "devDependencies": {
+    "webpack": "^5.99.8",
+    "webpack-cli": "^6.0.1"
+  },
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "author": "",
+  "license": "ISC"
 }
