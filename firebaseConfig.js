@@ -1,5 +1,6 @@
 // src/js/firebase-config.js
-
+import dotenv from 'dotenv';
+dotenv.config();
 import { initializeApp } from "https://www.gstatic.com/firebasejs/11.7.1/firebase-app.js";
 import { getAuth } from "https://www.gstatic.com/firebasejs/11.7.1/firebase-auth.js";
 // You can remove getAnalytics, getFirestore imports if you ONLY want auth for now
@@ -8,7 +9,7 @@ import { getAuth } from "https://www.gstatic.com/firebasejs/11.7.1/firebase-auth
 
 const firebaseConfig = {
   // Your project config details...
-  apiKey: "AIzaSyA_SIYh8CCbC12BmFOYS1VBSJLVnCBNu0c",
+  apiKey: "process.env.FIREBASE_API_KEY",
   authDomain: "citysurfer-609ab.firebaseapp.com",
   projectId: "citysurfer-609ab",
   storageBucket: "citysurfer-609ab.firebasestorage.app",
