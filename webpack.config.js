@@ -14,10 +14,26 @@ module.exports = {
   module: {
     rules: [
       {
+        test: /\.(js|jsx)$/,        // Transpile both .js and .jsx
+        exclude: /node_modules/,
+        use: {
+          loader: 'babel-loader',
+          options: {
+            presets: [
+              '@babel/preset-env',
+              '@babel/preset-react' // Enables JSX support
+            ]
+          }
+        }
+      },
+      {
         test: /\.css$/i,
         use: ['style-loader', 'css-loader'],
       },
     ],
+  },
+  resolve: {
+    extensions: ['.js', '.jsx'], // Allow imports without file extensions
   },
   plugins: [
     new HtmlWebpackPlugin({
@@ -42,9 +58,9 @@ module.exports = {
     }),
   ],
   output: {
-  path: path.resolve(__dirname, 'dist'),
-  filename: '[name].bundle.js',
-  clean: true,
-  publicPath: '',
+    path: path.resolve(__dirname, 'dist'),
+    filename: '[name].bundle.js',
+    clean: true,
+    publicPath: '',
   },
 };

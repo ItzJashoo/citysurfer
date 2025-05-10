@@ -1,13 +1,23 @@
 {
   "dependencies": {
     "@firebasegen/default-connector": "file:dataconnect-generated/js/default-connector",
-    "dotenv": "^16.5.0"
+    "@tailwindcss/cli": "^4.1.6",
+    "@tailwindcss/postcss": "^4.1.6",
+    "dotenv": "^16.5.0",
+    "react": "^19.1.0",
+    "react-dom": "^19.1.0",
+    "tailwindcss": "^4.1.6"
   },
   "name": "citysurfer",
   "description": "In a new city and want to make a local friend while also getting a view of the unique delights and customs of the city? CitySurfer is an app that can match you with locals who you can spend a day with.",
   "version": "1.0.0",
   "main": "firebaseConfig.js",
   "devDependencies": {
+    "@babel/core": "^7.27.1",
+    "@babel/preset-env": "^7.27.2",
+    "@babel/preset-react": "^7.27.1",
+    "autoprefixer": "^10.4.21",
+    "babel-loader": "^10.0.0",
     "copy-webpack-plugin": "^13.0.0",
     "css-loader": "^7.1.2",
     "style-loader": "^4.0.0",
