@@ -1,5 +1,5 @@
 
-import '/src/css/styles.css';
+import '../css/styles.css';
 import { 
   hideLoginError, 
   showLoginState, 
@@ -36,17 +36,16 @@ const loginEmailPassword = async () => {
   const loginEmail = txtEmail.value
   const loginPassword = txtPassword.value
 
-  // step 1: try doing this w/o error handling, and then add try/catch
-  await signInWithEmailAndPassword(auth, loginEmail, loginPassword)
-
-  // step 2: add error handling
-  // try {
-  //   await signInWithEmailAndPassword(auth, loginEmail, loginPassword)
-  // }
-  // catch(error) {
-  //   console.log(`There was an error: ${error}`)
-  //   showLoginError(error)
-  // }
+  
+  // error handling
+  try {
+   const userCredential = await signInWithEmailAndPassword(auth, loginEmail, loginPassword);
+   console.log(userCredential.user);
+  }
+  catch(error) {
+    console.log(error);
+    showLoginError(error);
+  }
 }
 
 // Create new account using email/password
