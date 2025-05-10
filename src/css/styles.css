@@ -144,7 +144,7 @@ input:focus ~ .highlight {
 }
 
 
-/* Button */
+/* Button Types*/
 
 .button {
   position: relative;
@@ -167,6 +167,25 @@ input:focus ~ .highlight {
 }
 .button:focus { outline: 0; }
 
+.smallbutton {
+  padding: 8px 16px;
+  font-size: 10px;
+  line-height: 18px;
+  border-bottom: 1px solid #3160B6;
+  margin: .3em 0 1em 0;
+  width: 100px;
+  height: 40px;
+  vertical-align: middle;
+  color: #fff;
+  background: transparent;
+  border: 0;
+  cursor: pointer;
+  transition: all 0.15s ease;
+  -webkit-font-smoothing: antialiased;
+  letter-spacing: 1px;
+  display: inline-block;
+}
+
 
 /* Button modifiers */
 
@@ -174,6 +193,7 @@ input:focus ~ .highlight {
   background: #4a89dc;
   text-shadow: 1px 1px 0 rgba(39, 110, 204, .5);
 }
+
 
 .buttonBlue:hover { background: #357bd8; }
 
