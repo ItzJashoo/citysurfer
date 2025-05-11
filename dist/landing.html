@@ -1,30 +1,161 @@
-<!Doctype html>
-<html lang="en-US">
+<!DOCTYPE html>
+<html lang="en">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <meta name="description" content="CitySurfer Main Page">
-    <meta name="keywords" content="CitySurfer, travel, social networking">
-    <meta name="author" content="CitySurfer Team">
-    <title>Explore CitySurfer | Main Page</title>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>CitySurfer | Home EN</title>
+  <link href="https://cdn.jsdelivr.net/npm/tailwindcss@2.2.19/dist/tailwind.min.css" rel="stylesheet"/>
+  <style>
+    @keyframes fadeIn {
+      from { opacity: 0; transform: translateY(-10px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
+
+    .animate-fade-in {
+      animation: fadeIn 0.3s ease-out forwards;
+    }
+
+    .nav-link {
+      position: relative;
+      overflow: hidden;
+    }
+
+    .nav-link::after {
+      content: '';
+      position: absolute;
+      bottom: 0;
+      left: 0;
+      width: 100%;
+      height: 2px;
+      background-color: currentColor;
+      transform: scaleX(0);
+      transform-origin: right;
+      transition: transform 0.3s ease-out;
+    }
+
+    .nav-link:hover::after {
+      transform: scaleX(1);
+      transform-origin: left;
+    }
+  </style>
+  <script src="./index.js" defer></script>
 <script defer src="landing.bundle.js"></script></head>
 
-<body>
-    <div style="background-color: #DEF5F5; text-align: center;">
-    <img src="images/citysurfer-logo.png" alt="CitySurfer logo" width="150" height="150"></div>
-    <h1 style="text-align: center;">Welcome to CitySurfer!</h1> 
-    <hr>
-    <p style="text-align: center;" > Whether you're looking for a tour guide, a dining companion, or just someone to show you around, CitySurfer has you covered! 
-    <br> CitySurfer is a social networking app designed to connect travelers with locals in their destination city.</p>
-    </div>
-    <div style="text-align: center;">
-    <button onclick="document.location='./login.html'">Find your match!</button>
-    </div>
-    <footer>
-        <div style="text-align: center;">
-        <p>© 2025 CitySurfer. All rights reserved.</p>
-        <p>Contact us: <a href="mailto:zhangjason831@gmail.com"> <img src="images/email.png" alt="email icon" width="15" height="15"> </a></p>
-        </div>
-    </footer>      
+<body class="bg-gray-800 flex flex-col min-h-screen">
+  <header class="dark:bg-gray-500 shadow-lg">
+    <nav class="container mx-auto px-4 py-0 flex justify-between items-center bg-gray-600 rounded-xl shadow-xl relative">
+      <a href="#" class="text-2xl font-bold text-indigo-200 dark:text-white transition-colors duration-300">CitySurfer</a>
+      <!-- Hamburger Icon -->
+      <button id="menu-toggle" class="md:hidden text-white focus:outline-none">
+        <svg class="w-8 h-8" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+          <path stroke-linecap="round" stroke-linejoin="round" d="M4 6h16M4 12h16M4 18h16" />
+        </svg>
+      </button>
+
+      <!-- Desktop Nav -->
+      <div class="hidden md:flex space-x-20 h-full">
+        <a href="#" id="nav-home" class="nav-link text-gray-700 dark:text-gray-200 bg-gray-300 dark:bg-gray-700 border-b-4 border-transparent hover:bg-gray-400 dark:hover:bg-gray-600 hover:border-indigo-800 px-4 py-0.5 rounded-t-lg flex items-center h-full transition-colors duration-300">Home</a>
+        <a href="#" id="nav-about" class="nav-link text-gray-700 dark:text-gray-200 bg-gray-300 dark:bg-gray-700 border-b-4 border-transparent hover:bg-gray-400 dark:hover:bg-gray-600 hover:border-indigo-800 px-4 py-0.5 rounded-t-lg flex items-center h-full transition-colors duration-300">About</a>
+        <a href="#" id="nav-Safety" class="nav-link text-gray-700 dark:text-gray-200 bg-gray-300 dark:bg-gray-700 border-b-4 border-transparent hover:bg-gray-400 dark:hover:bg-gray-600 hover:border-indigo-800 px-4 py-0.5 rounded-t-lg flex items-center h-full transition-colors duration-300">Safety</a>
+      </div>
+
+      <!-- Desktop Sign Up -->
+      <div class="hidden md:flex items-center space-x-4">
+        <a href="./login.html" class="bg-indigo-800 text-white px-4 py-2 rounded-lg hover:bg-blue-900 transition-colors duration-300">Sign Up</a>
+      </div>
+
+      <!-- Mobile Menu -->
+      <div id="mobile-menu" class="md:hidden absolute top-full left-0 w-full bg-gray-700 hidden flex-col items-start p-4 space-y-2 rounded-b-xl shadow-xl z-50">
+        <a href="#" id="mobile-nav-home" class="text-white block w-full">Home</a>
+        <a href="#" id="mobile-nav-about" class="text-white block w-full">About</a>
+        <a href="#" id="mobile-nav-Safety" class="text-white block w-full">Safety</a>
+        <a href="./login.html" class="text-white block w-full">Sign Up</a>
+      </div>
+    </nav>
+  </header>
+
+  <main class="container mx-auto px-4 py-8 flex-grow">
+    <!-- HOME SECTION -->
+    <section id="home-section">
+      <div class="flex flex-col md:flex-row items-center justify-between">
+        <h1 class="text-5xl md:text-9xl font-bold text-white mb-4">Welcome to CitySurfer</h1>
+        <img src="images/citysurfer-logo.png" alt="CitySurfer logo" width="350" height="350" class="mb-4 md:ml-4"/>
+      </div>
+      <h2 class="text-white font-bold text-2xl md:text-6xl text-right">
+        A social media platform built to connect tourists with locals who know the way around.
+      </h2>
+    </section>
+
+    <!-- ABOUT SECTION -->
+    <section id="about-section" class="hidden text-white mt-8">
+      <h1 class="text-5xl font-bold mb-4">About CitySurfer</h1>
+      <p class="text-xl">
+        When visiting a new city you may find yourself lost. But what if you had a friend, someone to guide you around, show you their favorite places, in exchange for friendship, and a life long love for adventure.
+      </p>
+    </section>
+
+    <!-- Safety SECTION -->
+    <section id="Safety-section" class="hidden text-white mt-8">
+      <h1 class="text-5xl font-bold mb-4">Safety</h1>
+      <p class="text-xl">
+        Explore local experiences, guided adventures, food tours, and more — all powered by our trusted community of locals. Both parties will be screened and all communication regarding meeting locations should be discussed on the Surfboard (CitySurfer's Dashboard).
+      </p>
+    </section>
+  </main>
+
+  <footer class="bg-white-100 text-white text-center p-4 mt-8 border-t border-gray-700 shadow-inner">
+    <p>© 2025 CitySurfer. All rights reserved.</p>
+    <p>
+      Contact us:
+      <a href="mailto:zhangjason831@gmail.com">
+        <img src="images/email.png" alt="email icon" width="15" height="15" class="inline-block ml-1"/>
+      </a>
+    </p>
+  </footer>
+
+  <script>
+    // Fade-in animation
+    const navLinks = document.querySelectorAll('.nav-link');
+    navLinks.forEach((link, index) => {
+      link.classList.add('animate-fade-in');
+      link.style.animationDelay = `${index * 0.1}s`;
+    });
+
+    // Section toggle logic
+    function showSection(id) {
+      document.querySelectorAll('main section').forEach(sec => sec.classList.add('hidden'));
+      document.getElementById(id).classList.remove('hidden');
+    }
+
+    // Desktop nav
+    document.getElementById('nav-home').addEventListener('click', e => {
+      e.preventDefault(); showSection('home-section');
+    });
+    document.getElementById('nav-about').addEventListener('click', e => {
+      e.preventDefault(); showSection('about-section');
+    });
+    document.getElementById('nav-Safety').addEventListener('click', e => {
+      e.preventDefault(); showSection('Safety-section');
+    });
+
+    // Mobile nav
+    document.getElementById('menu-toggle').addEventListener('click', () => {
+      document.getElementById('mobile-menu').classList.toggle('hidden');
+    });
+    document.getElementById('mobile-nav-home').addEventListener('click', e => {
+      e.preventDefault(); showSection('home-section');
+      document.getElementById('mobile-menu').classList.add('hidden');
+    });
+    document.getElementById('mobile-nav-about').addEventListener('click', e => {
+      e.preventDefault(); showSection('about-section');
+      document.getElementById('mobile-menu').classList.add('hidden');
+    });
+    document.getElementById('mobile-nav-Safety').addEventListener('click', e => {
+      e.preventDefault(); showSection('Safety-section');
+      document.getElementById('mobile-menu').classList.add('hidden');
+    });
+  </script>
+
+  <script defer src="landing.bundle.js"></script>
 </body>
 </html>
