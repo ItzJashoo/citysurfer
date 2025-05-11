@@ -833,7 +833,7 @@ footer a:hover {
   text-decoration: underline;
 }
 footer img {
-  width: 80px;
+  width: 15px;
   transition: all .2s ease;
 }
 footer img:hover {
