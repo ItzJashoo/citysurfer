@@ -1,17 +1,11 @@
 import '../css/styles.css';
 import { 
-  hideLoginError, 
-  showLoginState, 
-  showLoginForm, 
-  showApp, 
-  showLoginError, 
   btnLogout
 } from './ui'
 
 import { initializeApp } from 'firebase/app';
 import { 
   getAuth,
-  onAuthStateChanged, 
   signOut,
   connectAuthEmulator
 } from 'firebase/auth';
@@ -37,4 +31,3 @@ const logout = async () => {
 
 btnLogout.addEventListener("click", logout);
 
-hideLoginError();

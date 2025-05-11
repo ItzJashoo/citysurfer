@@ -9,7 +9,7 @@ import {
   btnSignup,
   btnLogout
 } from './ui'
-
+hideLoginError();
 import { initializeApp } from 'firebase/app';
 import { 
   getAuth,
@@ -93,8 +93,10 @@ const logout = async () => {
   await signOut(auth);
 }
 
-btnLogin.addEventListener("click", loginEmailPassword);
-btnSignup.addEventListener("click", createAccount);
-btnLogout.addEventListener("click", logout);
-
-monitorAuthState();
+document.addEventListener('DOMContentLoaded', () => {
+  btnLogin?.addEventListener("click", loginEmailPassword);
+  btnSignup?.addEventListener("click", createAccount);
+  btnLogout?.addEventListener("click", logout);
+  monitorAuthState();
+  hideLoginError();
+});

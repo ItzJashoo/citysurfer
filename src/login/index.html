@@ -1,13 +1,12 @@
 <!DOCTYPE html>
 <html lang="en-US">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <meta name="description" content="CitySurfer Login Page">
-    <meta name="keywords" content="CitySurfer, login, travel, social networking">
-    <meta name="author" content="CitySurfer Team">
-    <link rel="stylesheet" href="src/css/output.css">
-    <title>CitySurfer Login</title>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="description" content="CitySurfer Login Page">
+  <meta name="keywords" content="CitySurfer, login, travel, social networking">
+  <meta name="author" content="CitySurfer Team">
+  <title>CitySurfer Login</title>
 </head>
 <body>
 
@@ -26,20 +25,27 @@
         <label>Password</label>
       </div>
 
-      <div id="divLoginError" class="group">
+      <!-- This will be hidden by default -->
+      <div id="divLoginError" class="group" style="display: none;">
         <div id="lblLoginErrorMessage" class="errorlabel">Error message</div>
       </div>
+
       <button id="btnLogin" type="button" class="button buttonBlue">Log in</button>
       <button id="btnSignup" type="button" class="button buttonBlue">Sign up</button>
     </form>
   </div>
 
-     <footer>
-        <p>© 2025 CitySurfer. All rights reserved.</p>
-        <p style="text-align: center;">Contact us: <a href="mailto:zhangjason831@gmail.com"> <img src="images/email.png" alt="email icon" width="15" height="15" style="display: inline-block;"> </a></p>
-        <script defer src="login.bundle.js"></script>
-    </footer>      
+  <footer>
+    <p>© 2025 CitySurfer. All rights reserved.</p>
+    <p style="text-align: center;">
+      Contact us: 
+      <a href="mailto:zhangjason831@gmail.com">
+        <img src="images/email.png" alt="email icon" width="15" height="15" style="display: inline-block;">
+      </a>
+    </p>
+  </footer>
 
+  <!-- Your bundled script should go at the very end of body -->
+  <script defer src="login.bundle.js"></script>
 </body>
-
 </html>

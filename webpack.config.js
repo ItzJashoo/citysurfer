@@ -1,7 +1,7 @@
 const HtmlWebpackPlugin = require('html-webpack-plugin');
 const CopyWebpackPlugin = require('copy-webpack-plugin');
 const path = require('path');
-
+// Removed misplaced module block
 module.exports = {
   mode: 'development',
   devtool: 'eval-source-map',
@@ -28,7 +28,11 @@ module.exports = {
       },
       {
         test: /\.css$/i,
-        use: ['style-loader', 'css-loader'],
+        use: [
+          'style-loader',
+          'css-loader',
+          'postcss-loader' // Add this loader for Tailwind + PostCSS support
+        ],
       },
     ],
   },
