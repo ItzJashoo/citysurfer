@@ -12,3 +12,9 @@ How it works (hopefully :D):
 
 Future updates:
 A discover feed for updates by local guides and travelers.
+
+Updates:
+Login page works
+UI needs work and I need to continue working with Tailwind to migate my old CSS over
+Need to fix console errors
+Finish Dashboard
