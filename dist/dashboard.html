@@ -9,27 +9,29 @@
   <title>CitySurfer Surfboard</title>
   <link href="https://cdn.jsdelivr.net/npm/tailwindcss@2.2.19/dist/tailwind.min.css" rel="stylesheet">
   <script defer src="dashboard.bundle.js"></script></head>
-<body>
+<body class="bg-gray-300 flex flex-col min-h-screen">
   <div>
-    <div style="background-color: #DEF5F5; text-align: center;">
-      <h1 class="text-6xl font-bold">Surfboard</h1>
+    <div class="flex flex-col md:flex-row items-center justify-between mt-4"></div>
+      <div class="flex items-center">
+        <h1 class="text-5xl md:text-9xl font-bold text-gray-600 mb-4">SurfBoard</h1>
+        <img src="images/surfboard.png" alt="SurfBoard logo" width="150" height="150" class="mb-4 md:ml-4 rounded-3xl"/>
+      </div>
     </div>
-
-    <div id="lblAuthState" class="authlabel flex justify-center h-screen items-center">
+    <div id="lblAuthState" class="authlabel absolute top-4 right-4">
       <button id="btnLogout" class="px-4 py-2 bg-indigo-500 text-white rounded hover:bg-indigo-700 transition-colors duration-300">
-        Log Out
+      Log Out
       </button>
     </div>
   </div>
 </body>
 
 <footer>
-  <div class="text-center">
+  <div class="text-center"></div>
     <p>© 2025 CitySurfer. All rights reserved.</p>
     <p>
       Contact us: 
       <a href="mailto:zhangjason831@gmail.com">
-        <img src="images/email.png" alt="email icon" width="15" height="15">
+        <img src="images/email.png" alt="email icon" width="15" height="15" class="inline-block">
       </a>
     </p>
     <script defer src="dashboard.bundle.js"></script>
