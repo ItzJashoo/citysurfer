@@ -1,61 +1,68 @@
 <!DOCTYPE html>
-<html lang="en-US">
+<html lang="en">
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
   <title>CitySurfer | Profile</title>
   <link href="https://cdn.jsdelivr.net/npm/tailwindcss@2.2.19/dist/tailwind.min.css" rel="stylesheet"/>
 </head>
-<body class="bg-gray-300 flex flex-col h-screen">
+<body class="bg-gray-300 min-h-screen flex flex-col">
 
   <!-- Header -->
-  <header class="flex-none bg-white shadow px-4 py-3 flex items-center justify-between relative">
+  <header class="bg-white shadow px-4 py-3 flex items-center justify-between relative">
     <div class="flex items-center">
-      <!-- Hamburger (mobile only) -->
       <button id="btnMobileMenu" class="md:hidden mr-3 focus:outline-none">
         <svg class="w-6 h-6 text-gray-700" fill="none" stroke="currentColor" viewBox="0 0 24 24">
           <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
                 d="M4 6h16M4 12h16M4 18h16" />
         </svg>
       </button>
-      <!-- Title -->
-      <h1 class="text-3xl md:text-5xl font-bold text-gray-600">Profile Editor</h1>
+      <h1 class="text-2xl md:text-4xl font-bold text-gray-700">Profile Editor</h1>
     </div>
-
-    <!-- Desktop nav -->
     <nav class="hidden md:flex space-x-4 items-center">
-      <button id="btnReturn" 
-              class="px-4 py-2 bg-gray-200 text-gray-700 rounded hover:bg-gray-300">
+      <button id="btnReturn" class="px-4 py-2 bg-gray-200 text-gray-700 rounded hover:bg-gray-300">
         Back to SurfBoard
       </button>
-      <button id="btnLogout"
-              class="px-4 py-2 bg-indigo-500 text-white rounded hover:bg-indigo-700">
+      <button id="btnLogout" class="px-4 py-2 bg-indigo-500 text-white rounded hover:bg-indigo-700">
         Log Out
       </button>
     </nav>
-
-    <!-- Mobile menu (hidden by default) -->
-    <nav id="mobileMenu"
-         class="absolute top-full inset-x-0 bg-white shadow-md z-20 flex flex-col space-y-2 p-4 md:hidden hidden">
-      <button id="btnReturnMobile"
-              class="px-4 py-2 bg-gray-200 text-gray-700 rounded hover:bg-gray-300">
+    <nav id="mobileMenu" class="absolute top-full inset-x-0 bg-white shadow-md z-20 flex-col space-y-2 p-4 md:hidden hidden">
+      <button id="btnReturnMobile" class="px-4 py-2 bg-gray-200 text-gray-700 rounded hover:bg-gray-300">
         Back to SurfBoard
       </button>
-      <button id="btnLogoutMobile"
-              class="px-4 py-2 bg-indigo-500 text-white rounded hover:bg-indigo-700">
+      <button id="btnLogoutMobile" class="px-4 py-2 bg-indigo-500 text-white rounded hover:bg-indigo-700">
         Log Out
       </button>
     </nav>
   </header>
 
   <!-- Main Content -->
-  <main class="flex-1 overflow-auto p-6">
-    <!-- Your profile editor form / content goes here -->
-    <p class="text-gray-700">[Profile editing form placeholder]</p>
+  <main class="flex-1 flex items-center justify-center p-6">
+    <form id="profileForm" class="w-full max-w-xl bg-white p-6 rounded shadow space-y-6">
+      <div>
+        <input type="text" id="name" class="w-full p-3 border border-gray-300 rounded-md" placeholder="Enter your name" />
+      </div>
+      <div>
+        <input type="number" id="age" class="w-full p-3 border border-gray-300 rounded-md" placeholder="Enter your age" />
+      </div>
+      <div>
+        <input type="text" id="homelocation" class="w-full p-3 border border-gray-300 rounded-md" placeholder="Enter your home location" />
+      </div>
+      <div>
+        <textarea id="bio" class="w-full p-3 border border-gray-300 rounded-md" placeholder="Tell us about yourself"></textarea>
+      </div>
+      <div>
+        <input type="file" id="profilePicture" class="w-full p-3 border border-gray-300 rounded-md" />
+      </div>
+      <button type="submit" class="w-full py-3 bg-indigo-500 text-white rounded-md hover:bg-indigo-700">
+        Update Profile
+      </button>
+    </form>
   </main>
 
   <!-- Footer -->
-  <footer class="flex-none text-center p-4 bg-white shadow">
+  <footer class="text-center p-4 bg-white shadow">
     <p>© 2025 CitySurfer. All rights reserved.</p>
     <p>
       Contact us:
@@ -71,20 +78,30 @@
       const btnMobileMenu = document.getElementById('btnMobileMenu');
       const mobileMenu = document.getElementById('mobileMenu');
 
-      // Toggle mobile menu
       btnMobileMenu.addEventListener('click', () => {
         mobileMenu.classList.toggle('hidden');
       });
 
-      // Mirror actions to desktop buttons
-      document.getElementById('btnReturnMobile')
-        .addEventListener('click', () => document.getElementById('btnReturn').click());
-      document.getElementById('btnLogoutMobile')
-        .addEventListener('click', () => document.getElementById('btnLogout').click());
+      // Direct redirect for both buttons
+      document.getElementById('btnReturn').addEventListener('click', () => {
+        window.location.href = 'dashboard.html';  // Redirects directly to SurfBoard page
+      });
+
+      document.getElementById('btnReturnMobile').addEventListener('click', () => {
+        window.location.href = 'dashboard.html';  // Redirects directly to SurfBoard page
+      });
+
+      document.getElementById('btnLogout').addEventListener('click', () => {
+        window.location.href = 'login.html';  // Redirects to the login page (for logout)
+      });
+
+      document.getElementById('btnLogoutMobile').addEventListener('click', () => {
+        window.location.href = 'login.html';  // Redirects to the login page (for logout)
+      });
     });
   </script>
 
-  <!-- Your profile bundle (if any) -->
+  <!-- JS Bundle -->
   <script defer src="profile.bundle.js"></script>
 </body>
 </html>

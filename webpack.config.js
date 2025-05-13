@@ -61,6 +61,20 @@ module.exports = {
       chunks: ['profile'],
       inject: 'body'
     }),
+    // Index
+    new HtmlWebpackPlugin({
+      filename: 'index.html',
+      template: './src/index.html',
+      chunks: ['index'],
+      inject: 'body'
+    }),
+    // 404
+    new HtmlWebpackPlugin({
+      filename: '404.html',
+      template: './src/404.html',
+      chunks: ['404'],
+      inject: 'body'
+    }),
 
     // Copy static assets (images, etc)
     new CopyWebpackPlugin({

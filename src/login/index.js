@@ -9,6 +9,7 @@ import {
   btnSignup,
   btnLogout
 } from './ui';
+
 import { initializeApp } from 'firebase/app';
 import {
   getAuth,
@@ -16,12 +17,15 @@ import {
   signOut,
   createUserWithEmailAndPassword,
   signInWithEmailAndPassword,
-  connectAuthEmulator,
   sendPasswordResetEmail
 } from 'firebase/auth';
 
-// Initialize UI state
-hideLoginError();
+import {
+  getFirestore,
+  doc,
+  getDoc,
+  setDoc
+} from 'firebase/firestore';
 
 // Firebase config & initialization
 const firebaseApp = initializeApp({
@@ -35,8 +39,29 @@ const firebaseApp = initializeApp({
 });
 
 const auth = getAuth(firebaseApp);
-// Use emulator for local testing remove during production
-//connectAuthEmulator(auth, "http://localhost:9099");
+const db = getFirestore(firebaseApp);
+
+// Hide error on load
+hideLoginError();
+
+// Function to create a user profile doc in Firestore
+const createUserProfileIfNeeded = async (user) => {
+  const userRef = doc(db, "users", user.uid);
+  const userSnap = await getDoc(userRef);
+
+  if (!userSnap.exists()) {
+    await setDoc(userRef, {
+      email: user.email,
+      name: "",
+      age: null,
+      homelocation: "",
+      currentlocation: "",
+      profilePicture: "",
+      bio: "",
+      connections: []
+    });
+  }
+};
 
 // Login function
 const loginEmailPassword = async () => {
@@ -57,7 +82,8 @@ const createAccount = async () => {
   const password = txtPassword.value;
 
   try {
-    await createUserWithEmailAndPassword(auth, email, password);
+    const userCredential = await createUserWithEmailAndPassword(auth, email, password);
+    await createUserProfileIfNeeded(userCredential.user);
     window.location.href = 'dashboard.html';
   } catch (error) {
     showLoginError(error);
@@ -66,8 +92,10 @@ const createAccount = async () => {
 
 // Auth state monitoring
 const monitorAuthState = () => {
-  onAuthStateChanged(auth, user => {
+  onAuthStateChanged(auth, async user => {
     if (user) {
+      await createUserProfileIfNeeded(user);
+
       if (window.location.pathname.includes('dashboard')) {
         showApp();
         showLoginState(user);

@@ -39,38 +39,38 @@ onAuthStateChanged(auth, user => {
   }
 });
 // Tab elements
-const tabGuide     = document.getElementById('tabGuide');
-const tabVisitor   = document.getElementById('tabVisitor');
-const guideContent = document.getElementById('guideContent');
-const visitorContent = document.getElementById('visitorContent');
+const tabTravelers     = document.getElementById('tabTravelers');
+const tabGuides   = document.getElementById('tabGuides');
+const TravelersContent = document.getElementById('TravelersContent');
+const GuidesContent = document.getElementById('GuidesContent');
 
-function showGuideTab() {
-  // Highlight Guide tab
-  tabGuide.classList.add('border-blue-500', 'text-blue-600');
-  tabVisitor.classList.remove('border-blue-500', 'text-blue-600');
+function showTravelersTab() {
+  // Highlight Travelers tab
+  tabTravelers.classList.add('border-blue-500', 'text-blue-600');
+  tabGuides.classList.remove('border-blue-500', 'text-blue-600');
 
   // Show/hide content
-  guideContent.classList.remove('hidden');
-  visitorContent.classList.add('hidden');
+  TravelersContent.classList.remove('hidden');
+  GuidesContent.classList.add('hidden');
 }
 
-function showVisitorTab() {
-  // Highlight Visitor tab
-  tabVisitor.classList.add('border-blue-500', 'text-blue-600');
-  tabGuide.classList.remove('border-blue-500', 'text-blue-600');
+function showGuidesTab() {
+  // Highlight Guides tab
+  tabGuides.classList.add('border-blue-500', 'text-blue-600');
+  tabTravelers.classList.remove('border-blue-500', 'text-blue-600');
 
   // Show/hide content
-  visitorContent.classList.remove('hidden');
-  guideContent.classList.add('hidden');
+  GuidesContent.classList.remove('hidden');
+  TravelersContent.classList.add('hidden');
 }
 
 document.addEventListener('DOMContentLoaded', () => {
-  // Default to the Guide tab
-  showGuideTab();
+  // Default to the Travelers tab
+  showTravelersTab();
 
   // Wire up clicks
-  tabGuide.addEventListener('click', showGuideTab);
-  tabVisitor.addEventListener('click', showVisitorTab);
+  tabTravelers.addEventListener('click', showTravelersTab);
+  tabGuides.addEventListener('click', showGuidesTab);
 });
 
   const btnProfile = document.getElementById('btnProfile');

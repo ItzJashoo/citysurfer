@@ -48,7 +48,7 @@
 
     <!-- Mobile menu (hidden by default) -->
     <nav id="mobileMenu"
-         class="absolute top-full inset-x-0 bg-white shadow-md z-20 flex flex-col space-y-2 p-4 md:hidden hidden">
+         class="absolute top-full inset-x-0 bg-white shadow-md z-20 flex flex-col space-y-2 p-4 md:hidden" style="display: none;">
       <a
         id="btnProfileMobile"
         href="profile.html"
@@ -72,27 +72,27 @@
       <!-- Tabs -->
       <div class="flex border-b bg-white">
         <button
-          id="tabGuide"
+          id="tabTravelers"
           class="flex-1 px-4 py-3 text-center font-semibold border-b-2 border-blue-500 text-blue-600"
         >
-          Guide
+          Travelers
         </button>
         <button
-          id="tabVisitor"
+          id="tabGuides"
           class="flex-1 px-4 py-3 text-center font-semibold border-b-2 border-transparent text-gray-600 hover:text-gray-800"
         >
-          Visitor
+          Guides
         </button>
       </div>
 
       <!-- Panels -->
       <div class="flex-1 p-6 overflow-auto bg-white">
-        <div id="guideContent" class="h-full space-y-4">
-          <h2 class="text-2xl font-bold">Guide Dashboard</h2>
+        <div id="TravelersContent" class="h-full space-y-4">
+          <h2 class="text-2xl font-bold">Travelers Dashboard</h2>
           <!-- ... -->
         </div>
-        <div id="visitorContent" class="hidden h-full space-y-4">
-          <h2 class="text-2xl font-bold">Visitor Dashboard</h2>
+        <div id="GuidesContent" class="hidden h-full space-y-4">
+          <h2 class="text-2xl font-bold">Guides Dashboard</h2>
           <!-- ... -->
         </div>
       </div>
@@ -108,26 +108,26 @@
   <script>
     document.addEventListener('DOMContentLoaded', () => {
       // Tabs
-      const tabGuide = document.getElementById('tabGuide');
-      const tabVisitor = document.getElementById('tabVisitor');
-      const guideContent = document.getElementById('guideContent');
-      const visitorContent = document.getElementById('visitorContent');
+      const tabTravelers = document.getElementById('tabTravelers');
+      const tabGuides = document.getElementById('tabGuides');
+      const TravelersContent = document.getElementById('TravelersContent');
+      const GuidesContent = document.getElementById('GuidesContent');
 
-      function showGuide() {
-        tabGuide.classList.add('border-blue-500','text-blue-600');
-        tabVisitor.classList.remove('border-blue-500','text-blue-600');
-        guideContent.classList.remove('hidden');
-        visitorContent.classList.add('hidden');
+      function showTravelers() {
+        tabTravelers.classList.add('border-blue-500','text-blue-600');
+        tabGuides.classList.remove('border-blue-500','text-blue-600');
+        TravelersContent.classList.remove('hidden');
+        GuidesContent.classList.add('hidden');
       }
-      function showVisitor() {
-        tabVisitor.classList.add('border-blue-500','text-blue-600');
-        tabGuide.classList.remove('border-blue-500','text-blue-600');
-        visitorContent.classList.remove('hidden');
-        guideContent.classList.add('hidden');
+      function showGuides() {
+        tabGuides.classList.add('border-blue-500','text-blue-600');
+        tabTravelers.classList.remove('border-blue-500','text-blue-600');
+        GuidesContent.classList.remove('hidden');
+        TravelersContent.classList.add('hidden');
       }
-      showGuide();
-      tabGuide.addEventListener('click', showGuide);
-      tabVisitor.addEventListener('click', showVisitor);
+      showTravelers();
+      tabTravelers.addEventListener('click', showTravelers);
+      tabGuides.addEventListener('click', showGuides);
 
       // Mobile menu
       const btnMobileMenu = document.getElementById('btnMobileMenu');
