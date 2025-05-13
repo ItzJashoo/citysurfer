@@ -7,6 +7,44 @@
   <meta name="keywords" content="CitySurfer, login, travel, social networking"/>
   <meta name="author" content="CitySurfer Team"/>
   <title>CitySurfer Login</title>
+ <style>
+  .group {
+    position: relative;
+    margin: 2rem auto;
+    width: 90%; /* increased width */
+    max-width: 400px; /* optional: limit max width for large screens */
+  }
+
+  .group input {
+    width: 100%; /* input now fills the group container */
+    padding: 14px 12px;
+    border: 1px solid #ccc;
+    border-radius: 6px;
+    background: none;
+    font-size: 16px;
+    box-sizing: border-box;
+  }
+
+  .group label {
+    position: absolute;
+    left: 14px;
+    top: 50%;
+    transform: translateY(-50%);
+    color: #aaa;
+    pointer-events: none;
+    transition: 0.2s ease all;
+    background-color: white;
+    padding: 0 4px;
+  }
+
+  .group input:focus + label,
+  .group input:not(:placeholder-shown) + label {
+    top: -10px;
+    left: 10px;
+    font-size: 12px;
+    color: #333;
+  }
+</style>
 </head>
 <body>
 
@@ -17,14 +55,14 @@
     </div>
 
     <form>
-      <div class="group">
-        <input id="txtEmail" type="email" />
-        <label>Email</label>
-      </div>
-      <div class="group">
-        <input id="txtPassword" type="password" />
-        <label>Password</label>
-      </div>
+       <div class="group">
+    <input id="txtEmail" type="email" placeholder=" " />
+    <label for="txtEmail">Email</label>
+  </div>
+  <div class="group">
+    <input id="txtPassword" type="password" placeholder=" " />
+    <label for="txtPassword">Password</label>
+  </div>
 
       <div id="divLoginError" class="group" style="display: none;">
         <div id="lblLoginErrorMessage" class="errorlabel">Error message</div>
