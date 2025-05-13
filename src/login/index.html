@@ -1,11 +1,11 @@
 <!DOCTYPE html>
 <html lang="en-US">
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <meta name="description" content="CitySurfer Login Page">
-  <meta name="keywords" content="CitySurfer, login, travel, social networking">
-  <meta name="author" content="CitySurfer Team">
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <meta name="description" content="CitySurfer Login Page"/>
+  <meta name="keywords" content="CitySurfer, login, travel, social networking"/>
+  <meta name="author" content="CitySurfer Team"/>
   <title>CitySurfer Login</title>
 </head>
 <body>
@@ -13,19 +13,19 @@
   <div id="login">
     <div class="text-align-center header" onclick="window.location.href='landing.html'" style="text-align: center;">
       <h1 style="font-size: large; font-weight: bold;">Login to CitySurfer</h1>
-      <img src="images/citysurfer-logo.png" alt="CitySurfer logo" width="150" height="150" style="display: block; margin: 0 auto;">
+      <img src="images/citysurfer-logo.png" alt="CitySurfer logo" width="150" height="150" style="display: block; margin: 0 auto;"/>
     </div>
+
     <form>
       <div class="group">
-        <input id="txtEmail" type="email">
+        <input id="txtEmail" type="email" />
         <label>Email</label>
       </div>
       <div class="group">
-        <input id="txtPassword" type="password">
+        <input id="txtPassword" type="password" />
         <label>Password</label>
       </div>
 
-      <!-- This will be hidden by default -->
       <div id="divLoginError" class="group" style="display: none;">
         <div id="lblLoginErrorMessage" class="errorlabel">Error message</div>
       </div>
@@ -33,19 +33,66 @@
       <button id="btnLogin" type="button" class="button buttonBlue">Log in</button>
       <button id="btnSignup" type="button" class="button buttonBlue">Sign up</button>
     </form>
+
+    <!-- Dropdown + reset section -->
+    <div class="mt-4 flex flex-col items-center">
+      <select
+        id="actionSelect"
+        class="p-2 border rounded mb-2"
+      >
+        <option value="">Forgot Password?</option>
+        <option value="forgot">Press to Reset</option>
+      </select>
+
+      <!-- hidden until dropdown = "forgot" -->
+      <div
+        id="resetGroup"
+        style="display: none; flex-direction: column; align-items: center;"
+      >
+        <input
+          type="email"
+          id="resetEmail"
+          placeholder="Enter your email"
+          class="w-24 p-2 border rounded mb-2"
+        />
+        <button
+          id="btnReset"
+          class="px-2 py-1 text-sm rounded bg-blue-600 text-white hover:bg-blue-700"
+        >
+          Send Reset Email
+        </button>
+        <p id="resetMessage" class="text-sm mt-2 text-green-400"></p>
+      </div>
+    </div>
   </div>
 
   <footer>
     <p>© 2025 CitySurfer. All rights reserved.</p>
     <p style="text-align: center;">
-      Contact us: 
+      Contact us:
       <a href="mailto:zhangjason831@gmail.com">
-        <img src="images/email.png" alt="email icon" width="15" height="15" style="display: inline-block;">
+        <img src="images/email.png" alt="email icon" width="15" height="15" style="display: inline-block;" />
       </a>
     </p>
   </footer>
 
-  <!-- Your bundled script should go at the very end of body -->
+  <!-- UI toggle logic -->
+  <script>
+    document.addEventListener('DOMContentLoaded', () => {
+      const actionSelect = document.getElementById('actionSelect');
+      const resetGroup = document.getElementById('resetGroup');
+
+      actionSelect.addEventListener('change', () => {
+        if (actionSelect.value === 'forgot') {
+          resetGroup.style.display = 'flex';
+        } else {
+          resetGroup.style.display = 'none';
+        }
+      });
+    });
+  </script>
+
+  <!-- Your bundled Firebase + reset-email logic -->
   <script defer src="login.bundle.js"></script>
 </body>
 </html>

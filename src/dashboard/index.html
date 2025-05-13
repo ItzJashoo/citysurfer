@@ -3,37 +3,146 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <meta name="description" content="CitySurfer Login Page">
-  <meta name="keywords" content="CitySurfer, login, travel, social networking">
-  <meta name="author" content="CitySurfer Team">
-  <title>CitySurfer Surfboard</title>
+  <title>CitySurfer SurfBoard</title>
   <link href="https://cdn.jsdelivr.net/npm/tailwindcss@2.2.19/dist/tailwind.min.css" rel="stylesheet">
-  </head>
-<body class="bg-gray-300 flex flex-col min-h-screen">
-  <div>
-    <div class="flex flex-col md:flex-row items-center justify-between mt-4"></div>
-      <div class="flex items-center">
-        <h1 class="text-5xl md:text-9xl font-bold text-gray-600 mb-4">SurfBoard</h1>
-        <img src="images/surfboard.png" alt="SurfBoard logo" width="150" height="150" class="mb-4 md:ml-4 rounded-3xl"/>
+</head>
+<body class="bg-gray-300 flex flex-col h-screen">
+
+  <!-- Header -->
+  <header class="flex-none bg-white shadow px-4 py-3 flex items-center justify-between relative">
+    <div class="flex items-center">
+      <!-- Hamburger: only on sm screens -->
+      <button id="btnMobileMenu" class="md:hidden mr-3 focus:outline-none">
+        <svg class="w-6 h-6 text-gray-700" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                d="M4 6h16M4 12h16M4 18h16" />
+        </svg>
+      </button>
+
+      <!-- Logo / Title -->
+      <h1 class="text-3xl md:text-5xl font-bold text-gray-600">SurfBoard</h1>
+      <img
+        src="images/surfboard.png"
+        alt="SurfBoard logo"
+        width="80" height="80"
+        class="ml-3 rounded-3xl hidden md:block"
+      />
+    </div>
+
+    <!-- Desktop nav -->
+    <nav class="hidden md:flex space-x-2 items-center">
+      <a
+        id="btnProfile"
+        href="profile.html"
+        class="px-4 py-2 bg-gray-200 text-gray-700 rounded hover:bg-gray-300"
+      >
+        Profile
+      </a>
+      <button
+        id="btnLogout"
+        class="px-4 py-2 bg-indigo-500 text-white rounded hover:bg-indigo-700"
+      >
+        Log Out
+      </button>
+    </nav>
+
+    <!-- Mobile menu (hidden by default) -->
+    <nav id="mobileMenu"
+         class="absolute top-full inset-x-0 bg-white shadow-md z-20 flex flex-col space-y-2 p-4 md:hidden hidden">
+      <a
+        id="btnProfileMobile"
+        href="profile.html"
+        class="px-4 py-2 bg-gray-200 text-gray-700 rounded hover:bg-gray-300 text-center"
+      >
+        Profile
+      </a>
+      <button
+        id="btnLogoutMobile"
+        class="px-4 py-2 bg-indigo-500 text-white rounded hover:bg-indigo-700"
+      >
+        Log Out
+      </button>
+    </nav>
+  </header>
+
+  <!-- Main Content -->
+  <main class="flex-1 overflow-auto bg-gray-100">
+    <div class="max-w-5xl mx-auto h-full flex flex-col">
+
+      <!-- Tabs -->
+      <div class="flex border-b bg-white">
+        <button
+          id="tabGuide"
+          class="flex-1 px-4 py-3 text-center font-semibold border-b-2 border-blue-500 text-blue-600"
+        >
+          Guide
+        </button>
+        <button
+          id="tabVisitor"
+          class="flex-1 px-4 py-3 text-center font-semibold border-b-2 border-transparent text-gray-600 hover:text-gray-800"
+        >
+          Visitor
+        </button>
+      </div>
+
+      <!-- Panels -->
+      <div class="flex-1 p-6 overflow-auto bg-white">
+        <div id="guideContent" class="h-full space-y-4">
+          <h2 class="text-2xl font-bold">Guide Dashboard</h2>
+          <!-- ... -->
+        </div>
+        <div id="visitorContent" class="hidden h-full space-y-4">
+          <h2 class="text-2xl font-bold">Visitor Dashboard</h2>
+          <!-- ... -->
+        </div>
       </div>
     </div>
-    <div id="lblAuthState" class="authlabel absolute top-4 right-4">
-      <button id="btnLogout" class="px-4 py-2 bg-indigo-500 text-white rounded hover:bg-indigo-700 transition-colors duration-300">
-      Log Out
-      </button>
-    </div>
-  </div>
-</body>
+  </main>
 
-<footer>
-  <div class="text-center"></div>
+  <!-- Footer -->
+  <footer class="flex-none text-center p-4 bg-white shadow">
     <p>© 2025 CitySurfer. All rights reserved.</p>
-    <p>
-      Contact us: 
-      <a href="mailto:zhangjason831@gmail.com">
-        <img src="images/email.png" alt="email icon" width="15" height="15" class="inline-block">
-      </a>
-    </p>
-    <script defer src="dashboard.bundle.js"></script>
-  </div>
-</footer>
+  </footer>
+
+  <!-- Tab + Mobile-Menu Script -->
+  <script>
+    document.addEventListener('DOMContentLoaded', () => {
+      // Tabs
+      const tabGuide = document.getElementById('tabGuide');
+      const tabVisitor = document.getElementById('tabVisitor');
+      const guideContent = document.getElementById('guideContent');
+      const visitorContent = document.getElementById('visitorContent');
+
+      function showGuide() {
+        tabGuide.classList.add('border-blue-500','text-blue-600');
+        tabVisitor.classList.remove('border-blue-500','text-blue-600');
+        guideContent.classList.remove('hidden');
+        visitorContent.classList.add('hidden');
+      }
+      function showVisitor() {
+        tabVisitor.classList.add('border-blue-500','text-blue-600');
+        tabGuide.classList.remove('border-blue-500','text-blue-600');
+        visitorContent.classList.remove('hidden');
+        guideContent.classList.add('hidden');
+      }
+      showGuide();
+      tabGuide.addEventListener('click', showGuide);
+      tabVisitor.addEventListener('click', showVisitor);
+
+      // Mobile menu
+      const btnMobileMenu = document.getElementById('btnMobileMenu');
+      const mobileMenu = document.getElementById('mobileMenu');
+      btnMobileMenu.addEventListener('click', () => {
+        mobileMenu.classList.toggle('hidden');
+      });
+
+      // Mobile logout mirrors desktop
+      document.getElementById('btnLogoutMobile')
+        .addEventListener('click', () => document.getElementById('btnLogout').click());
+    });
+  </script>
+
+  <!-- Dashboard Bundle -->
+  <script defer src="dashboard.bundle.js"></script>
+</body>
+</html>

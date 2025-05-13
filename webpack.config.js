@@ -1,64 +1,70 @@
+const path = require('path');
 const HtmlWebpackPlugin = require('html-webpack-plugin');
 const CopyWebpackPlugin = require('copy-webpack-plugin');
-const path = require('path');
-// Removed misplaced module block
+
 module.exports = {
   mode: 'development',
   devtool: 'eval-source-map',
   entry: {
-    landing: './src/landing/index.js',
-    login: './src/login/index.js',
+    landing:   './src/landing/index.js',
+    login:     './src/login/index.js',
     dashboard: './src/dashboard/index.js',
+    profile:   './src/profile/index.js',
   },
   watch: true,
   module: {
     rules: [
       {
-        test: /\.(js|jsx)$/,        // Transpile both .js and .jsx
+        test: /\.(js|jsx)$/,
         exclude: /node_modules/,
-        use: {
-          loader: 'babel-loader',
-          options: {
-            presets: [
-              '@babel/preset-env',
-              '@babel/preset-react' // Enables JSX support
-            ]
-          }
-        }
+        use: 'babel-loader'
       },
       {
         test: /\.css$/i,
         use: [
           'style-loader',
           'css-loader',
-          'postcss-loader' // Add this loader for Tailwind + PostCSS support
+          'postcss-loader'
         ],
       },
     ],
   },
   resolve: {
-    extensions: ['.js', '.jsx'], // Allow imports without file extensions
+    extensions: ['.js', '.jsx'],
   },
   plugins: [
+    // Landing
     new HtmlWebpackPlugin({
       filename: 'landing.html',
       template: './src/landing/index.html',
-      chunks: ['landing']
+      chunks: ['landing'],
+      inject: 'body'
     }),
+    // Login
     new HtmlWebpackPlugin({
       filename: 'login.html',
       template: './src/login/index.html',
-      chunks: ['login']
+      chunks: ['login'],
+      inject: 'body'
     }),
+    // Dashboard
     new HtmlWebpackPlugin({
       filename: 'dashboard.html',
       template: './src/dashboard/index.html',
-      chunks: ['dashboard']
+      chunks: ['dashboard'],
+      inject: 'body'
     }),
+    // Profile
+    new HtmlWebpackPlugin({
+      filename: 'profile.html',
+      template: './src/profile/index.html',
+      chunks: ['profile'],
+      inject: 'body'
+    }),
+
+    // Copy static assets (images, etc)
     new CopyWebpackPlugin({
-      patterns: [
-        { from: 'src/images', to: 'images' }
-      ]
+      patterns: [{ from: 'src/images', to: 'images' }]
     }),
   ],
   output: {

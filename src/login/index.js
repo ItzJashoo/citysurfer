@@ -1,25 +1,29 @@
 import '../css/styles.css';
-import { 
-  hideLoginError, 
-  showLoginState, 
-  showLoginForm, 
-  showApp, 
-  showLoginError, 
+import {
+  hideLoginError,
+  showLoginState,
+  showLoginForm,
+  showApp,
+  showLoginError,
   btnLogin,
   btnSignup,
   btnLogout
-} from './ui'
-hideLoginError();
+} from './ui';
 import { initializeApp } from 'firebase/app';
-import { 
+import {
   getAuth,
-  onAuthStateChanged, 
+  onAuthStateChanged,
   signOut,
   createUserWithEmailAndPassword,
   signInWithEmailAndPassword,
-  connectAuthEmulator
+  connectAuthEmulator,
+  sendPasswordResetEmail
 } from 'firebase/auth';
 
+// Initialize UI state
+hideLoginError();
+
+// Firebase config & initialization
 const firebaseApp = initializeApp({
   apiKey: "AIzaSyA_SIYh8CCbC12BmFOYS1VBSJLVnCBNu0c",
   authDomain: "citysurfer-609ab.firebaseapp.com",
@@ -31,72 +35,83 @@ const firebaseApp = initializeApp({
 });
 
 const auth = getAuth(firebaseApp);
-// comment this line out when deploying to production
-connectAuthEmulator(auth, "http://localhost:9099");
+// Use emulator for local testing remove during production
+//connectAuthEmulator(auth, "http://localhost:9099");
 
-// Login using email/password
+// Login function
 const loginEmailPassword = async () => {
   const loginEmail = txtEmail.value;
   const loginPassword = txtPassword.value;
 
   try {
-    const userCredential = await signInWithEmailAndPassword(auth, loginEmail, loginPassword);
-    console.log("Login successful. Redirecting...");
+    await signInWithEmailAndPassword(auth, loginEmail, loginPassword);
     window.location.href = 'dashboard.html';
   } catch (error) {
-    console.log(error);
     showLoginError(error);
   }
-}
+};
 
-// Create new account using email/password
+// Signup function
 const createAccount = async () => {
   const email = txtEmail.value;
   const password = txtPassword.value;
 
   try {
     await createUserWithEmailAndPassword(auth, email, password);
-    console.log("Account created. Redirecting...");
     window.location.href = 'dashboard.html';
   } catch (error) {
-    console.log(`There was an error: ${error}`);
     showLoginError(error);
   }
-}
+};
 
-// Monitor auth state
-const monitorAuthState = async () => {
+// Auth state monitoring
+const monitorAuthState = () => {
   onAuthStateChanged(auth, user => {
     if (user) {
-      console.log("User is logged in:", user.email);
-      // Only show app if already on dashboard
       if (window.location.pathname.includes('dashboard')) {
         showApp();
         showLoginState(user);
         hideLoginError();
       } else if (window.location.pathname.includes('login')) {
-        // Already logged in on login page? Go to dashboard.
         window.location.href = 'dashboard.html';
       }
     } else {
       showLoginForm();
-      const lblAuthState = document.getElementById('lblAuthState');
-      if (lblAuthState) {
-        lblAuthState.innerHTML = `You're not logged in.`;
-      }
+      const lbl = document.getElementById('lblAuthState');
+      if (lbl) lbl.textContent = `You're not logged in.`;
     }
   });
-}
+};
 
-// Log out
+// Logout function
 const logout = async () => {
   await signOut(auth);
-}
+};
 
+// DOM event bindings
 document.addEventListener('DOMContentLoaded', () => {
-  btnLogin?.addEventListener("click", loginEmailPassword);
-  btnSignup?.addEventListener("click", createAccount);
-  btnLogout?.addEventListener("click", logout);
+  btnLogin?.addEventListener('click', loginEmailPassword);
+  btnSignup?.addEventListener('click', createAccount);
+  btnLogout?.addEventListener('click', logout);
   monitorAuthState();
   hideLoginError();
+
+  // Forgot Password handler
+  const resetBtn = document.getElementById('btnReset');
+  const resetEmailInput = document.getElementById('resetEmail');
+  const resetMessage = document.getElementById('resetMessage');
+
+  resetBtn?.addEventListener('click', async () => {
+    const email = resetEmailInput.value.trim();
+    if (!email) {
+      resetMessage.textContent = 'Please enter your email address.';
+      return;
+    }
+    try {
+      await sendPasswordResetEmail(auth, email);
+      resetMessage.textContent = 'Password reset email sent! Check your inbox.';
+    } catch (err) {
+      resetMessage.textContent = err.message;
+    }
+  });
 });
