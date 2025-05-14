@@ -4,7 +4,8 @@ import { initializeApp } from 'firebase/app';
 import {
   getAuth,
   signOut,
-  onAuthStateChanged
+  onAuthStateChanged,
+  sendPasswordResetEmail
 } from 'firebase/auth';
 import {
   getFirestore,
@@ -26,7 +27,7 @@ const firebaseApp = initializeApp({
 const auth = getAuth(firebaseApp);
 const db   = getFirestore(firebaseApp);
 
-// Utility: detect base64 image strings
+// Utility to detect base64 images
 const isBase64Image = str => typeof str === 'string' && str.startsWith('data:image/');
 
 // --- Logout handler ---
@@ -35,17 +36,31 @@ btnLogout?.addEventListener('click', async () => {
   window.location.href = 'login.html';
 });
 
-// --- Firestore profile update ---
+// --- Firestore profile update with confirmation ---
 async function updateProfile(user, profileData) {
   try {
     await updateDoc(doc(db, 'users', user.uid), profileData);
-    window.location.href = 'dashboard.html';
+
+    // Show confirmation
+    const msg = document.getElementById('updateMessage');
+    if (msg) {
+      msg.textContent = '🎉 Profile updated successfully!';
+      msg.classList.remove('text-red-600');
+      msg.classList.add('text-green-500');
+    }
+
+
   } catch (err) {
     console.error('Error updating profile:', err);
+    const msg = document.getElementById('updateMessage');
+    if (msg) {
+      msg.textContent = `Error: ${err.message}`;
+      msg.classList.remove('text-green-500');
+      msg.classList.add('text-red-600');
+    }
   }
 }
 
-// Keep track of the logged-in user
 let currentUser = null;
 
 document.addEventListener('DOMContentLoaded', () => {
@@ -56,7 +71,7 @@ document.addEventListener('DOMContentLoaded', () => {
     mobileMenu?.classList.toggle('hidden');
   });
 
-  // --- Nav buttons ---
+  // --- Navigation buttons ---
   document.getElementById('btnReturn')?.addEventListener('click', () => {
     window.location.href = 'dashboard.html';
   });
@@ -68,16 +83,49 @@ document.addEventListener('DOMContentLoaded', () => {
     window.location.href = 'login.html';
   });
 
-  // --- Profile form & preview setup ---
-  const form                = document.getElementById('profileForm');
-  const nameInput           = document.getElementById('name');
-  const ageInput            = document.getElementById('age');
-  const homeLocationInput   = document.getElementById('homelocation');
-  const bioInput            = document.getElementById('bio');
-  const pictureInput        = document.getElementById('profilePicture');
-  const previewImg          = document.getElementById('profilePreview');
+  // --- Password reset dropdown & handler ---
+  const actionSelect  = document.getElementById('actionSelect');
+  const resetGroup    = document.getElementById('resetGroup');
+  const resetEmailIn  = document.getElementById('resetEmail');
+  const btnReset      = document.getElementById('btnReset');
+  const resetMessage  = document.getElementById('resetMessage');
 
-  // Listen for auth state
+  actionSelect?.addEventListener('change', () => {
+    resetGroup.style.display = actionSelect.value === 'forgot' ? 'flex' : 'none';
+    resetMessage.textContent = '';
+  });
+
+  btnReset?.addEventListener('click', async (e) => {
+    e.preventDefault();
+    const email = resetEmailIn.value.trim();
+    if (!email) {
+      resetMessage.textContent = 'Please enter your email address.';
+      resetMessage.classList.add('text-red-600');
+      return;
+    }
+    try {
+      await sendPasswordResetEmail(auth, email);
+      resetMessage.textContent = '✅ Check your email for a password-reset link.';
+      resetMessage.classList.remove('text-red-600');
+      resetMessage.classList.add('text-green-500');
+      setTimeout(() => resetMessage.textContent = '', 10000);
+    } catch (err) {
+      resetMessage.textContent = `Error: ${err.message}`;
+      resetMessage.classList.add('text-red-600');
+    }
+  });
+
+  // --- Profile form & preview setup ---
+  const form         = document.getElementById('profileForm');
+  const nameInput    = document.getElementById('name');
+  const ageInput     = document.getElementById('age');
+  const cityInput    = document.getElementById('city');
+  const countryInput = document.getElementById('country');
+  const bioInput     = document.getElementById('bio');
+  const pictureInput = document.getElementById('profilePicture');
+  const previewImg   = document.getElementById('profilePreview');
+
+  // Pre-fill when user logs in
   onAuthStateChanged(auth, async user => {
     if (!user) {
       window.location.replace('login.html');
@@ -85,22 +133,27 @@ document.addEventListener('DOMContentLoaded', () => {
     }
     currentUser = user;
 
-    // Pre-fill the form
     const snap = await getDoc(doc(db, 'users', user.uid));
     if (snap.exists()) {
       const data = snap.data();
-      nameInput.value         = data.name || '';
-      ageInput.value          = data.age  || '';
-      homeLocationInput.value = data.homelocation || '';
-      bioInput.value          = data.bio  || '';
+      nameInput.value  = data.name || '';
+      ageInput.value   = data.age  ?? '';
+      bioInput.value   = data.bio || '';
+
+      if (data.homelocation) {
+        const [c='', cn=''] = data.homelocation.split(',').map(s=>s.trim());
+        cityInput.value    = c;
+        countryInput.value = cn;
+      }
+
       if (data.profilePicture && (isBase64Image(data.profilePicture) || data.profilePicture.startsWith('http'))) {
-        previewImg.src      = data.profilePicture;
+        previewImg.src = data.profilePicture;
         previewImg.classList.remove('hidden');
       }
     }
   });
 
-  // Handle form submit
+  // Handle profile form submission
   form?.addEventListener('submit', async e => {
     e.preventDefault();
     if (!currentUser) return;
@@ -108,7 +161,7 @@ document.addEventListener('DOMContentLoaded', () => {
     const profileData = {
       name:         nameInput.value.trim(),
       age:          parseInt(ageInput.value.trim()) || null,
-      homelocation: homeLocationInput.value.trim(),
+      homelocation: `${cityInput.value.trim()}, ${countryInput.value.trim()}`.replace(/^,|,$/g,'').trim(),
       bio:          bioInput.value.trim()
     };
 
@@ -128,5 +181,4 @@ document.addEventListener('DOMContentLoaded', () => {
       await updateProfile(currentUser, profileData);
     }
   });
-
 });
