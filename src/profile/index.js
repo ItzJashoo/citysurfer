@@ -41,7 +41,6 @@ async function updateProfile(user, profileData) {
   try {
     await updateDoc(doc(db, 'users', user.uid), profileData);
 
-    // Show confirmation
     const msg = document.getElementById('updateMessage');
     if (msg) {
       msg.textContent = '🎉 Profile updated successfully!';
@@ -49,6 +48,10 @@ async function updateProfile(user, profileData) {
       msg.classList.add('text-green-500');
     }
 
+    // Redirect after a short delay so user can read the message
+    setTimeout(() => {
+      window.location.href = 'dashboard.html';
+    }, 2000);
 
   } catch (err) {
     console.error('Error updating profile:', err);
@@ -71,6 +74,15 @@ document.addEventListener('DOMContentLoaded', () => {
     mobileMenu?.classList.toggle('hidden');
   });
 
+  // --- Clear‐picture button (always register) ---
+  const pictureInput = document.getElementById('profilePicture');
+  const previewImg   = document.getElementById('profilePreview');
+  const btnClearPic  = document.getElementById('btnClearPicture');
+  btnClearPic?.addEventListener('click', () => {
+    // only clear the file input, leave existing preview intact
+    pictureInput.value = '';
+  });
+
   // --- Navigation buttons ---
   document.getElementById('btnReturn')?.addEventListener('click', () => {
     window.location.href = 'dashboard.html';
@@ -84,11 +96,11 @@ document.addEventListener('DOMContentLoaded', () => {
   });
 
   // --- Password reset dropdown & handler ---
-  const actionSelect  = document.getElementById('actionSelect');
-  const resetGroup    = document.getElementById('resetGroup');
-  const resetEmailIn  = document.getElementById('resetEmail');
-  const btnReset      = document.getElementById('btnReset');
-  const resetMessage  = document.getElementById('resetMessage');
+  const actionSelect = document.getElementById('actionSelect');
+  const resetGroup   = document.getElementById('resetGroup');
+  const resetEmailIn = document.getElementById('resetEmail');
+  const btnReset     = document.getElementById('btnReset');
+  const resetMessage = document.getElementById('resetMessage');
 
   actionSelect?.addEventListener('change', () => {
     resetGroup.style.display = actionSelect.value === 'forgot' ? 'flex' : 'none';
@@ -122,8 +134,6 @@ document.addEventListener('DOMContentLoaded', () => {
   const cityInput    = document.getElementById('city');
   const countryInput = document.getElementById('country');
   const bioInput     = document.getElementById('bio');
-  const pictureInput = document.getElementById('profilePicture');
-  const previewImg   = document.getElementById('profilePreview');
 
   // Pre-fill when user logs in
   onAuthStateChanged(auth, async user => {
@@ -138,10 +148,10 @@ document.addEventListener('DOMContentLoaded', () => {
       const data = snap.data();
       nameInput.value  = data.name || '';
       ageInput.value   = data.age  ?? '';
-      bioInput.value   = data.bio || '';
+      bioInput.value   = data.bio  || '';
 
       if (data.homelocation) {
-        const [c='', cn=''] = data.homelocation.split(',').map(s=>s.trim());
+        const [c='', cn=''] = data.homelocation.split(',').map(s => s.trim());
         cityInput.value    = c;
         countryInput.value = cn;
       }
