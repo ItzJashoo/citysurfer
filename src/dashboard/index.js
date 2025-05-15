@@ -129,7 +129,19 @@ onAuthStateChanged(auth, async user => {
               const name = d.name || d.email || 'Unnamed';
               const li = document.createElement('li');
               li.textContent = name;
+
+              // Create a "Message" button
+              const btnMessage = document.createElement('button');
+              btnMessage.textContent = 'Message';
+              btnMessage.classList.add('ml-2', 'text-blue-500', 'underline');
+              btnMessage.addEventListener('click', () => {
+                // Redirect to inbox with receiver's ID
+                window.location.href = `inbox.html?uid=${ds.id}`;
+              });
+
+              li.appendChild(btnMessage);
               ul.appendChild(li);
+
               count++;
             });
             if (count===0) ul.innerHTML = '<li>No other travelers found.</li>';
