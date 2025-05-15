@@ -55,7 +55,7 @@ const createUserProfileIfNeeded = async (user) => {
       name: "",
       age: null,
       homelocation: "",
-      currentlocation: "",
+      location: "",
       profilePicture: "",
       bio: "",
       connections: []
