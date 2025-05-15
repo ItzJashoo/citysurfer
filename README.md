@@ -11,13 +11,16 @@ How it works (hopefully :D):
 7. If you loved it, maybe schedule another one!
 
 Want to test the app?
-https://citysurfer-609ab.web.app/landing.html
+https://citysurfer-609ab.web.app/
 
 Future updates:
 A discover feed for updates by local guides and travelers.
 
 Updates:
-Login page works
-UI needs work and I need to continue working with Tailwind to migate my old CSS over
-Need to fix console errors
-Finish Dashboard
+UI has been updated across the board
+Profile editor works
+Home page can have more info but it's functional and looks nice
+
+Next steps:
+Finishing the dashboard 
+Adding the rest of the features :D
