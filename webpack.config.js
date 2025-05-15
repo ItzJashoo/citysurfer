@@ -10,6 +10,7 @@ module.exports = {
     login:     './src/login/index.js',
     dashboard: './src/dashboard/index.js',
     profile:   './src/profile/index.js',
+    inbox:     './src/inbox/index.js',
   },
   watch: true,
   module: {
@@ -73,6 +74,13 @@ module.exports = {
       filename: '404.html',
       template: './src/404.html',
       chunks: ['404'],
+      inject: 'body'
+    }),
+    // Inbox
+    new HtmlWebpackPlugin({
+      filename: 'inbox.html',
+      template: './src/inbox/index.html',
+      chunks: ['inbox'],
       inject: 'body'
     }),
 
