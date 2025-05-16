@@ -9,76 +9,98 @@ import {
 } from 'firebase/auth';
 import {
   getFirestore,
-  doc,
-  getDoc,
-  updateDoc,
   collection,
   query,
+  where,
   orderBy,
   onSnapshot,
   addDoc,
-  where,
   Timestamp
 } from 'firebase/firestore';
 
-// Firebase config
+// ——— Firebase init ———
 const firebaseApp = initializeApp({
-  apiKey: "AIzaSyA_SIYh8CCbC12BmFOYS1VBSJLVnCBNu0c",
-  authDomain: "citysurfer-609ab.firebaseapp.com",
+  apiKey:    "AIzaSyA_SIYh8CCbC12BmFOYS1VBSJLVnCBNu0c",
+  authDomain:"citysurfer-609ab.firebaseapp.com",
   projectId: "citysurfer-609ab",
   storageBucket: "citysurfer-609ab.appspot.com",
   messagingSenderId: "736165172289",
-  appId: "1:736165172289:web:0f75f82abf121cdb06e2c0",
+  appId:     "1:736165172289:web:0f75f82abf121cdb06e2c0",
   measurementId: "G-7LHT92W2NX"
 });
+const auth = getAuth(firebaseApp);
+const db   = getFirestore(firebaseApp);
 
-const db = getFirestore();
-const auth = getAuth();
-const params = new URLSearchParams(window.location.search);
+// ——— UI refs ———
+const msgForm     = document.getElementById('messageForm');
+const msgInput    = document.getElementById('messageInput');
+const msgList     = document.getElementById('messageList');
+const params      = new URLSearchParams(window.location.search);
 const recipientId = params.get('uid');
 
-const msgForm = document.getElementById('messageForm');
-const msgInput = document.getElementById('messageInput');
-const msgList = document.getElementById('messageList');
+let chatInitialized = false;
 
-// Redirect if not logged in
-onAuthStateChanged(auth, async user => {
-  if (!user || !recipientId) {
-    window.location.replace('login.html');
-    return;
+// ——— Logout ———
+btnLogout?.addEventListener('click', async () => {
+  await signOut(auth);
+  window.location.replace('login.html');
+});
+
+// ——— Main listener ———
+onAuthStateChanged(auth, user => {
+  if (!user) {
+    return window.location.replace('login.html');
   }
+  if (!recipientId) {
+    return console.error('Missing recipient UID in URL');
+  }
+  if (chatInitialized) return;
+  chatInitialized = true;
 
-  // Realtime listener for messages
-  const q = query(
+  // Create sorted participants array for consistent ordering
+  const participants = [user.uid, recipientId].sort();
+
+  // Query messages where participants match (array equality)
+  const chatQ = query(
     collection(db, 'messages'),
-    where('from', 'in', [user.uid, recipientId]),
-    where('to', 'in', [user.uid, recipientId]),
+    where('participants', '==', participants),
     orderBy('timestamp', 'asc')
   );
 
-  onSnapshot(q, snapshot => {
-    msgList.innerHTML = '';
-    snapshot.forEach(doc => {
-      const msg = doc.data();
-      const li = document.createElement('li');
-      li.textContent = `${msg.from === user.uid ? 'You' : 'Them'}: ${msg.text}`;
-      msgList.appendChild(li);
-    });
-  });
+  onSnapshot(chatQ,
+    snap => {
+      msgList.innerHTML = '';
+      snap.forEach(docSnap => {
+        const m = docSnap.data();
+        const li = document.createElement('li');
+        li.textContent = `${m.from === user.uid ? 'You' : 'Them'}: ${m.text}`;
+        msgList.appendChild(li);
+      });
+    },
+    err => {
+      console.error('Messages snapshot error:', err);
+      msgList.innerHTML = `<li class="text-red-600">Error loading chat.</li>`;
+    }
+  );
 
-  // Send message on submit
-  msgForm.addEventListener('submit', async e => {
+  // — Send new messages — 
+  msgForm?.addEventListener('submit', async e => {
     e.preventDefault();
     const text = msgInput.value.trim();
     if (!text) return;
 
-    await addDoc(collection(db, 'messages'), {
-      from: user.uid,
-      to: recipientId,
-      text,
-      timestamp: Timestamp.now()
-    });
-
-    msgInput.value = '';
+    try {
+      await addDoc(collection(db, 'messages'), {
+        from:         user.uid,
+        to:           recipientId,
+        participants: participants,  // <--- Added participants array here
+        text,
+        timestamp:    Timestamp.now()
+      });
+      msgInput.value = '';
+    } catch (writeErr) {
+      console.error('Send message error:', writeErr);
+      alert('Failed to send message.');
+    }
   });
 });

@@ -11,57 +11,29 @@
   <!-- Header -->
   <header class="flex-none bg-white shadow px-4 py-3 flex items-center justify-between relative">
     <div class="flex items-center">
-      <!-- Hamburger: only on sm screens -->
       <button id="btnMobileMenu" class="md:hidden mr-3 focus:outline-none">
         <svg class="w-6 h-6 text-gray-700" fill="none" stroke="currentColor" viewBox="0 0 24 24">
           <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
                 d="M4 6h16M4 12h16M4 18h16" />
         </svg>
       </button>
-
-      <!-- Logo / Title -->
       <h1 class="text-3xl md:text-5xl font-bold text-gray-600">SurfBoard</h1>
-      <img
-        src="images/surfboard.png"
-        alt="SurfBoard logo"
-        width="80" height="80"
-        class="ml-3 rounded-3xl hidden md:block"
-      />
+      <img src="images/surfboard.png" alt="SurfBoard logo" width="80" height="80"
+           class="ml-3 rounded-3xl hidden md:block" />
     </div>
-
-    <!-- Desktop nav -->
     <nav class="hidden md:flex space-x-2 items-center">
-      <a
-        id="btnProfile"
-        href="profile.html"
-        class="px-4 py-2 bg-gray-200 text-gray-700 rounded hover:bg-gray-300"
-      >
-        Profile
-      </a>
-      <button
-        id="btnLogout"
-        class="px-4 py-2 bg-indigo-500 text-white rounded hover:bg-indigo-700"
-      >
+      <a id="btnProfile" href="profile.html"
+         class="px-4 py-2 bg-gray-200 text-gray-700 rounded hover:bg-gray-300">Profile</a>
+      <button id="btnLogout" class="px-4 py-2 bg-indigo-500 text-white rounded hover:bg-indigo-700">
         Log Out
       </button>
     </nav>
-
-    <!-- Mobile menu (hidden by default) -->
     <nav id="mobileMenu"
          class="absolute top-full inset-x-0 bg-white shadow-md z-20 flex flex-col space-y-2 p-4 md:hidden hidden">
-      <a
-        id="btnProfileMobile"
-        href="profile.html"
-        class="px-4 py-2 bg-gray-200 text-gray-700 rounded hover:bg-gray-300 text-center"
-      >
-        Profile
-      </a>
-      <button
-        id="btnLogoutMobile"
-        class="px-4 py-2 bg-indigo-500 text-white rounded hover:bg-indigo-700"
-      >
-        Log Out
-      </button>
+      <a id="btnProfileMobile" href="profile.html"
+         class="px-4 py-2 bg-gray-200 text-gray-700 rounded hover:bg-gray-300 text-center">Profile</a>
+      <button id="btnLogoutMobile"
+              class="px-4 py-2 bg-indigo-500 text-white rounded hover:bg-indigo-700">Log Out</button>
     </nav>
   </header>
 
@@ -71,36 +43,34 @@
 
       <!-- Tabs -->
       <div class="flex border-b bg-white">
-        <button
-          id="tabTravelers"
-          class="flex-1 px-4 py-3 text-center font-semibold border-b-2 border-blue-500 text-blue-600"
-        >
+        <button id="tabTravelers"
+                class="flex-1 px-4 py-3 text-center font-semibold border-b-2 border-blue-500 text-blue-600">
           Travelers
         </button>
-        <button
-          id="tabGuides"
-          class="flex-1 px-4 py-3 text-center font-semibold border-b-2 border-transparent text-gray-600 hover:text-gray-800"
-        >
+        <button id="tabGuides"
+                class="flex-1 px-4 py-3 text-center font-semibold border-b-2 border-transparent text-gray-600 hover:text-gray-800">
           Guides
         </button>
       </div>
 
       <!-- Panels -->
       <div class="flex-1 p-6 overflow-auto bg-white">
+
+        <!-- Travelers Panel -->
         <div id="TravelersContent" class="h-full">
-         <h2 class="text-2xl font-bold mb-4">Travelers Dashboard</h2>
-          <div class="flex items-center space-x-4 w-full">
-            <form id="locationForm" class="flex flex-col md:flex-row space-y-2 md:space-y-0 md:space-x-2 w-full">
-                <span class="font-semibold text-lg text-gray-700 md:text-xl mb-1 md:mb-0 md:mr-2">Where are you headed?</span>
-              <input
-                id="locationInput"
-                type="text"
-                placeholder="Enter a city"
-                class="flex-1 px-4 py-2 border border-gray-300 rounded"
-                required
-              />
-            <select id="countrySelect" class="px-4 border border-gray-300 rounded" required>
-            <option value="">Select your country</option>
+          <h2 class="text-2xl font-bold mb-4">Travelers Dashboard</h2>
+
+          <!-- Location Form -->
+          <form id="locationForm" class="w-full space-y-4">
+            <span class="block font-semibold text-lg text-gray-700">
+              Where are you headed?
+            </span>
+            <div class="flex flex-col md:flex-row md:items-center space-y-2 md:space-y-0 md:space-x-2">
+              <input id="locationInput" type="text" placeholder="Enter a city"
+                     class="flex-1 px-4 py-2 border border-gray-300 rounded" required />
+              <select id="countrySelect"
+                      class="flex-none px-4 py-2 border border-gray-300 rounded" required>
+                <option value="">Select your country</option>
             <option value="Afghanistan">Afghanistan</option>
             <option value="Albania">Albania</option>
             <option value="Algeria">Algeria</option>
@@ -297,18 +267,15 @@
             <option value="Zambia">Zambia</option>
             <option value="Zimbabwe">Zimbabwe</option>
           </select>
-
-
-            <button
-              type="submit"
-              class="px-4 bg-indigo-500 text-white rounded hover:bg-indigo-700">
-              Find a Guide!
-            </button>
+              <button type="submit"
+                      class="flex-none px-4 py-2 bg-indigo-500 text-white rounded hover:bg-indigo-700">
+                Find a Guide!
+              </button>
+            </div>
           </form>
 
-
-          </div>
-          <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+          <!-- Upcoming & Past Trips -->
+          <div class="grid grid-cols-1 md:grid-cols-2 gap-4 mt-6">
             <div class="bg-gray-200 p-4 rounded-lg shadow">
               <h3 class="text-xl font-semibold">Upcoming Trips</h3>
               <p class="text-gray-600">No trips planned yet.</p>
@@ -318,17 +285,20 @@
               <p class="text-gray-600">No trips completed yet.</p>
             </div>
           </div>
-        </div> <!-- ✅ Closed TravelersContent -->
+        </div> <!-- /#TravelersContent -->
 
+        <!-- Guides Panel -->
         <div id="GuidesContent" class="hidden h-full space-y-4">
           <h2 class="text-2xl font-bold">Guides Dashboard</h2>
           <p class="text-gray-700">Manage your tours and bookings.</p>
-        <div id="NearbyTravelers" class="mt-6">
-      <h3 class="text-xl font-semibold">Travelers in Your Area</h3>
-      <ul id="travelersList" class="list-disc list-inside mt-2 text-gray-700">
-        <li>Loading…</li>
-      </ul>
-    </div>
+
+          <div id="NearbyTravelers" class="mt-6">
+            <h3 class="text-xl font-semibold">Travelers in Your Area</h3>
+            <ul id="travelersList" class="list-disc list-inside mt-2 text-gray-700">
+              <li>Loading…</li>
+            </ul>
+          </div>
+
           <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
             <div class="bg-gray-200 p-4 rounded-lg shadow">
               <h3 class="text-xl font-semibold">Upcoming Tours</h3>
@@ -339,7 +309,8 @@
               <p class="text-gray-600">No tours completed yet.</p>
             </div>
           </div>
-        </div> <!-- ✅ Closed GuidesContent -->
+        </div> <!-- /#GuidesContent -->
+
       </div>
     </div>
   </main>
@@ -352,42 +323,37 @@
   <!-- Tab + Mobile-Menu Script -->
   <script>
     document.addEventListener('DOMContentLoaded', () => {
-      // Tabs
       const tabTravelers = document.getElementById('tabTravelers');
-      const tabGuides = document.getElementById('tabGuides');
+      const tabGuides    = document.getElementById('tabGuides');
       const TravelersContent = document.getElementById('TravelersContent');
-      const GuidesContent = document.getElementById('GuidesContent');
+      const GuidesContent    = document.getElementById('GuidesContent');
 
       function showTravelers() {
-        tabTravelers.classList.add('border-blue-500','text-blue-600');
-        tabGuides.classList.remove('border-blue-500','text-blue-600');
+        tabTravelers .classList.add('border-blue-500','text-blue-600');
+        tabGuides    .classList.remove('border-blue-500','text-blue-600');
         TravelersContent.classList.remove('hidden');
-        GuidesContent.classList.add('hidden');
+        GuidesContent   .classList.add('hidden');
       }
 
       function showGuides() {
-        tabGuides.classList.add('border-blue-500','text-blue-600');
-        tabTravelers.classList.remove('border-blue-500','text-blue-600');
-        GuidesContent.classList.remove('hidden');
+        tabGuides    .classList.add('border-blue-500','text-blue-600');
+        tabTravelers .classList.remove('border-blue-500','text-blue-600');
+        GuidesContent   .classList.remove('hidden');
         TravelersContent.classList.add('hidden');
       }
 
-      showTravelers(); // Default view
+      // Default to Travelers
+      showTravelers();
 
       tabTravelers.addEventListener('click', showTravelers);
-      tabGuides.addEventListener('click', showGuides);
+      tabGuides   .addEventListener('click', showGuides);
 
       // Mobile menu toggle
-      const btnMobileMenu = document.getElementById('btnMobileMenu');
-      const mobileMenu = document.getElementById('mobileMenu');
-
-      btnMobileMenu.addEventListener('click', () => {
-        mobileMenu.classList.toggle('hidden');
+      document.getElementById('btnMobileMenu').addEventListener('click', () => {
+        document.getElementById('mobileMenu').classList.toggle('hidden');
       });
-
-      // Mobile logout click triggers desktop logout
       document.getElementById('btnLogoutMobile')
-        .addEventListener('click', () => document.getElementById('btnLogout').click());
+              .addEventListener('click', () => document.getElementById('btnLogout').click());
     });
   </script>
 
