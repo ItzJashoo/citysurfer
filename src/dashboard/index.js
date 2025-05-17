@@ -24,7 +24,7 @@ const firebaseApp = initializeApp({
   apiKey:    "AIzaSyA_SIYh8CCbC12BmFOYS1VBSJLVnCBNu0c",
   authDomain:"citysurfer-609ab.firebaseapp.com",
   projectId: "citysurfer-609ab",
-  storageBucket: "citysurfer-609ab.firebasestorage.app",
+  storageBucket: "citysurfer-609ab.appspot.com",
   messagingSenderId: "736165172289",
   appId:     "1:736165172289:web:0f75f82abf121cdb06e2c0",
   measurementId: "G-7LHT92W2NX"
@@ -61,6 +61,12 @@ document.addEventListener('DOMContentLoaded', () => {
   tabGuides.addEventListener('click',    showGuidesTab);
   document.getElementById('btnProfile')?.addEventListener('click', () => {
     window.location.href = 'profile.html';
+  });
+  document.getElementById('btnInbox')?.addEventListener('click', () => {
+    window.location.href = 'inbox.html';
+  });
+  document.getElementById('btnInboxMobile')?.addEventListener('click', () => {
+    window.location.href = 'inbox.html';
   });
 });
 
@@ -101,6 +107,24 @@ onAuthStateChanged(auth, async user => {
         alert('Failed to save location.');
       }
     });
+  }
+
+  // — Inbox Badge Logic —
+  const inboxBadge = document.getElementById('inboxBadge');
+  if (inboxBadge) {
+    try {
+      const messagesRef = collection(db, 'messages');
+      const q = query(messagesRef,
+        where('to', '==', user.uid),
+        where('read', '==', false)
+      );
+      const unreadSnap = await getDocs(q);
+      if (!unreadSnap.empty) {
+        inboxBadge.classList.remove('hidden');
+      }
+    } catch (err) {
+      console.error('Error checking unread messages:', err);
+    }
   }
 
   // — Nearby Travelers (Guides tab) —
@@ -149,6 +173,41 @@ onAuthStateChanged(auth, async user => {
     } catch(err) {
       console.error('Error fetching travelers:', err);
       ul.innerHTML = '<li>Error loading travelers.</li>';
+    }
+  }
+
+  // — Inbox Name Display (replace UID with sender's name) —
+  const inboxList = document.getElementById('inboxList');
+  if (inboxList) {
+    try {
+      const q = query(collection(db, 'messages'), where('to', '==', user.uid));
+      const inboxSnap = await getDocs(q);
+      inboxList.innerHTML = '';
+      if (inboxSnap.empty) {
+        inboxList.innerHTML = '<li>No messages yet.</li>';
+      } else {
+        for (const docSnap of inboxSnap.docs) {
+          const msg = docSnap.data();
+          const senderId = msg.from;
+
+          // Get sender's name
+          let senderName = senderId;
+          try {
+            const senderSnap = await getDoc(doc(db, 'users', senderId));
+            if (senderSnap.exists()) {
+              senderName = senderSnap.data().name || senderId;
+            }
+          } catch (err) {
+            console.warn('Could not fetch sender name:', err);
+          }
+
+          const li = document.createElement('li');
+          li.textContent = `From ${senderName}: ${msg.text}`;
+          inboxList.appendChild(li);
+        }
+      }
+    } catch (err) {
+      console.error('Error loading inbox:', err);
     }
   }
 });

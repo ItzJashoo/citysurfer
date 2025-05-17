@@ -1,3 +1,4 @@
+
 import '../css/styles.css';
 import { btnLogout } from './ui.js';
 
@@ -15,11 +16,13 @@ import {
   orderBy,
   onSnapshot,
   addDoc,
+  doc,
+  getDoc,
   Timestamp
 } from 'firebase/firestore';
 
 // ——— Firebase init ———
-const firebaseApp = initializeApp({
+const firebaseConfig = {
   apiKey:    "AIzaSyA_SIYh8CCbC12BmFOYS1VBSJLVnCBNu0c",
   authDomain:"citysurfer-609ab.firebaseapp.com",
   projectId: "citysurfer-609ab",
@@ -27,7 +30,16 @@ const firebaseApp = initializeApp({
   messagingSenderId: "736165172289",
   appId:     "1:736165172289:web:0f75f82abf121cdb06e2c0",
   measurementId: "G-7LHT92W2NX"
+};
+
+// Log config to ensure we’re pointing at the right project
+console.log('Initializing Firebase with:', {
+  apiKey: firebaseConfig.apiKey,
+  authDomain: firebaseConfig.authDomain,
+  projectId: firebaseConfig.projectId
 });
+
+const firebaseApp = initializeApp(firebaseConfig);
 const auth = getAuth(firebaseApp);
 const db   = getFirestore(firebaseApp);
 
@@ -52,18 +64,33 @@ onAuthStateChanged(auth, user => {
     return window.location.replace('login.html');
   }
   if (!recipientId) {
-    return console.error('Missing recipient UID in URL');
+    console.error('Missing recipient UID in URL');
+    return;
   }
   if (chatInitialized) return;
   chatInitialized = true;
 
-  // Create sorted participants array for consistent ordering
-  const participants = [user.uid, recipientId].sort();
+  // === SANITY-CHECK: Log the query filters ===
+  console.log('Running chat query:', {
+    filterField: 'participants',
+    filterOp: 'array-contains',
+    filterValue: user.uid
+  });
 
-  // Query messages where participants match (array equality)
+  // === SANITY-CHECK: Manual single-doc fetch ===
+  const testDocId = '51Mu2N5mJ7bJoeqfw5UBfc82Evg1';  // adjust as needed
+  getDoc(doc(db, 'messages', testDocId))
+    .then(d => {
+      console.log(`getDoc(${testDocId}) allowed?`, d.exists(), d.data());
+    })
+    .catch(e => {
+      console.error(`getDoc(${testDocId}) failed:`, e);
+    });
+
+  // ——— Query only messages you’re a participant of ———
   const chatQ = query(
     collection(db, 'messages'),
-    where('participants', '==', participants),
+    where('participants', 'array-contains', user.uid),
     orderBy('timestamp', 'asc')
   );
 
@@ -72,6 +99,9 @@ onAuthStateChanged(auth, user => {
       msgList.innerHTML = '';
       snap.forEach(docSnap => {
         const m = docSnap.data();
+        // client-side filter to only this chat
+        if (!m.participants.includes(recipientId)) return;
+
         const li = document.createElement('li');
         li.textContent = `${m.from === user.uid ? 'You' : 'Them'}: ${m.text}`;
         msgList.appendChild(li);
@@ -93,7 +123,7 @@ onAuthStateChanged(auth, user => {
       await addDoc(collection(db, 'messages'), {
         from:         user.uid,
         to:           recipientId,
-        participants: participants,  // <--- Added participants array here
+        participants: [user.uid, recipientId].sort(),
         text,
         timestamp:    Timestamp.now()
       });
