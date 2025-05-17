@@ -314,12 +314,13 @@
           <!-- Upcoming & Past Trips -->
           <div class="grid grid-cols-1 md:grid-cols-2 gap-4 mt-6">
             <div class="bg-gray-200 p-4 rounded-lg shadow">
-              <h3 class="text-xl font-semibold">Upcoming Trips</h3>
-              <p class="text-gray-600">No trips planned yet.</p>
-            </div>
+            <h3 class="text-xl font-semibold">Upcoming Trips</h3>
+            <p class="text-gray-600"> You have no upcoming trips. </p>
+          </div>
+
             <div class="bg-gray-200 p-4 rounded-lg shadow">
-              <h3 class="text-xl font-semibold">Past Trips</h3>
-              <p class="text-gray-600">No trips completed yet.</p>
+              <h3 class="text-xl font-semibold">Reviews</h3>
+              <p class="text-gray-600">No reviews yet.</p>
             </div>
           </div>
         </div> <!-- /#TravelersContent -->
@@ -342,8 +343,8 @@
               <p class="text-gray-600">No tours scheduled yet.</p>
             </div>
             <div class="bg-gray-200 p-4 rounded-lg shadow">
-              <h3 class="text-xl font-semibold">Past Tours</h3>
-              <p class="text-gray-600">No tours completed yet.</p>
+              <h3 class="text-xl font-semibold">Reviews</h3>
+              <p class="text-gray-600">No reviews yet.</p>
             </div>
           </div>
         </div> <!-- /#GuidesContent -->
@@ -403,80 +404,92 @@
 
   <!-- Dashboard Bundle -->
 <script type="module">
-  // 1) Load Firebase ESM from the CDN
+  // Firebase imports
   import { initializeApp } from "https://www.gstatic.com/firebasejs/9.22.1/firebase-app.js";
-  import { getAuth, onAuthStateChanged }
-    from "https://www.gstatic.com/firebasejs/9.22.1/firebase-auth.js";
+  import { getAuth, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/9.22.1/firebase-auth.js";
   import {
     getFirestore, collection, query,
     where, onSnapshot, doc, getDoc
   } from "https://www.gstatic.com/firebasejs/9.22.1/firebase-firestore.js";
 
-  // 2) Your config
+  // Firebase config
   const firebaseConfig = {
-    apiKey:    "AIzaSyA_SIYh8CCbC12BmFOYS1VBSJLVnCBNu0c",
-    authDomain:"citysurfer-609ab.firebaseapp.com",
+    apiKey: "AIzaSyA_SIYh8CCbC12BmFOYS1VBSJLVnCBNu0c",
+    authDomain: "citysurfer-609ab.firebaseapp.com",
     projectId: "citysurfer-609ab",
     storageBucket: "citysurfer-609ab.appspot.com",
     messagingSenderId: "736165172289",
-    appId:     "1:736165172289:web:0f75f82abf121cdb06e2c0",
+    appId: "1:736165172289:web:0f75f82abf121cdb06e2c0",
     measurementId: "G-7LHT92W2NX"
   };
 
-  // 3) Init Firebase
-  const app  = initializeApp(firebaseConfig);
+  // Init Firebase
+  const app = initializeApp(firebaseConfig);
   const auth = getAuth(app);
-  const db   = getFirestore(app);
+  const db = getFirestore(app);
 
-  // 4) DOM refs
+  // DOM refs
   const chatsList = document.getElementById('openChatsList');
 
   onAuthStateChanged(auth, user => {
     if (!user) return;
 
-    // — All open chats I’m in —
     const chatQ = query(
       collection(db, 'messages'),
-      where('participants','array-contains',user.uid)
+      where('participants', 'array-contains', user.uid)
     );
-    onSnapshot(chatQ, async snap => {
-      // Gather all other UIDs
-      const otherUids = new Set();
-      snap.forEach(d => {
-        d.data().participants.forEach(id => {
-          if (id !== user.uid) otherUids.add(id);
+
+    // Real-time listener
+    onSnapshot(chatQ, async (snap) => {
+      const otherUidsSet = new Set();
+
+      snap.forEach(docSnap => {
+        const data = docSnap.data();
+        const participants = data.participants || [];
+        participants.forEach(uid => {
+          if (uid !== user.uid) otherUidsSet.add(uid);
         });
       });
 
       chatsList.innerHTML = '';
-      if (otherUids.size === 0) {
+
+      if (otherUidsSet.size === 0) {
         chatsList.innerHTML = '<li>No open chats.</li>';
         return;
       }
 
-      // For each UID, fetch their display name
-      const fetches = Array.from(otherUids).map(async uid => {
-        try {
-          const userDoc = await getDoc(doc(db, 'users', uid));
-          return userDoc.exists() ? userDoc.data().name : uid;
-        } catch {
-          return uid;
-        }
-      });
+      // Fetch user info for each UID
+      const userEntries = await Promise.all(
+        Array.from(otherUidsSet).map(async uid => {
+          try {
+            const userDocSnap = await getDoc(doc(db, 'users', uid));
+            if (userDocSnap.exists()) {
+              const data = userDocSnap.data();
+              const name = data.name || 'Unknown';
+              const location = data.homelocation || 'Unknown location';
+              return { uid, label: `${name} from ${location}` };
+            }
+            return { uid, label: 'Unknown user' };
+          } catch (err) {
+            console.error('Error fetching user:', err);
+            return { uid, label: 'Error loading user' };
+          }
+        })
+      );
 
-      const names = await Promise.all(fetches);
-
-      // Render
-      names.forEach((name, idx) => {
-        const uid = Array.from(otherUids)[idx];
+      // Render list
+      userEntries.forEach(({ uid, label }) => {
         const li = document.createElement('li');
-        const a  = document.createElement('a');
-        a.href        = `inbox.html?uid=${uid}`;
-        a.textContent = name;
-        a.className   = 'text-blue-600 hover:underline';
+        const a = document.createElement('a');
+        a.href = `inbox.html?uid=${uid}`;
+        a.textContent = label;
+        a.className = 'text-blue-600 hover:underline';
         li.appendChild(a);
         chatsList.appendChild(li);
       });
+      if (otherUidsSet.size > 0) {
+  document.getElementById('messagesModal').classList.remove('hidden');
+}
     });
   });
 </script>
