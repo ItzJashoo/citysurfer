@@ -1,8 +1,7 @@
-
 import '../css/styles.css';
 import { btnLogout } from './ui.js';
 
-import { initializeApp } from 'firebase/app';
+import { initializeApp, getApps, getApp } from 'firebase/app';
 import {
   getAuth,
   signOut,
@@ -32,14 +31,18 @@ const firebaseConfig = {
   measurementId: "G-7LHT92W2NX"
 };
 
-// Log config to ensure we’re pointing at the right project
-console.log('Initializing Firebase with:', {
-  apiKey: firebaseConfig.apiKey,
-  authDomain: firebaseConfig.authDomain,
-  projectId: firebaseConfig.projectId
-});
+let firebaseApp;
+if (!getApps().length) {
+  console.log('Initializing Firebase with:', {
+    apiKey: firebaseConfig.apiKey,
+    authDomain: firebaseConfig.authDomain,
+    projectId: firebaseConfig.projectId
+  });
+  firebaseApp = initializeApp(firebaseConfig);
+} else {
+  firebaseApp = getApp();
+}
 
-const firebaseApp = initializeApp(firebaseConfig);
 const auth = getAuth(firebaseApp);
 const db   = getFirestore(firebaseApp);
 
@@ -58,79 +61,88 @@ btnLogout?.addEventListener('click', async () => {
   window.location.replace('login.html');
 });
 
-// ——— Main listener ———
-onAuthStateChanged(auth, user => {
-  if (!user) {
-    return window.location.replace('login.html');
-  }
-  if (!recipientId) {
-    console.error('Missing recipient UID in URL');
-    return;
-  }
-  if (chatInitialized) return;
-  chatInitialized = true;
+// ——— Only attach listener once ———
+if (!window.__chatAuthListenerAttached) {
+  window.__chatAuthListenerAttached = true;
 
-  // === SANITY-CHECK: Log the query filters ===
-  console.log('Running chat query:', {
-    filterField: 'participants',
-    filterOp: 'array-contains',
-    filterValue: user.uid
-  });
+  onAuthStateChanged(auth, async user => {
+    if (!user) {
+      return window.location.replace('login.html');
+    }
+    if (!recipientId) {
+      console.error('Missing recipient UID in URL');
+      return;
+    }
+    if (chatInitialized) return;
+    chatInitialized = true;
 
-  // === SANITY-CHECK: Manual single-doc fetch ===
-  const testDocId = '51Mu2N5mJ7bJoeqfw5UBfc82Evg1';  // adjust as needed
-  getDoc(doc(db, 'messages', testDocId))
-    .then(d => {
-      console.log(`getDoc(${testDocId}) allowed?`, d.exists(), d.data());
-    })
-    .catch(e => {
-      console.error(`getDoc(${testDocId}) failed:`, e);
+    // Fetch the recipient's display name
+    let recipientName = 'Unknown';
+    try {
+      const userDoc = await getDoc(doc(db, 'users', recipientId));
+      if (userDoc.exists()) {
+        recipientName = userDoc.data().name;
+      }
+    } catch (nameErr) {
+      console.error('Failed to fetch recipient name:', nameErr);
+    }
+
+    // === SANITY-CHECK: Log the query filters ===
+    console.log('Running chat query:', {
+      filterField: 'participants',
+      filterOp: 'array-contains',
+      filterValue: user.uid
     });
 
-  // ——— Query only messages you’re a participant of ———
-  const chatQ = query(
-    collection(db, 'messages'),
-    where('participants', 'array-contains', user.uid),
-    orderBy('timestamp', 'asc')
-  );
+    // ——— Query only messages you’re a participant of ———
+    const chatQ = query(
+      collection(db, 'messages'),
+      where('participants', 'array-contains', user.uid),
+      orderBy('timestamp', 'asc')
+    );
 
-  onSnapshot(chatQ,
-    snap => {
-      msgList.innerHTML = '';
-      snap.forEach(docSnap => {
-        const m = docSnap.data();
-        // client-side filter to only this chat
-        if (!m.participants.includes(recipientId)) return;
+    onSnapshot(chatQ,
+      snap => {
+        msgList.innerHTML = '';
+        snap.forEach(docSnap => {
+          const m = docSnap.data();
+          if (!m.participants.includes(recipientId)) return;
 
-        const li = document.createElement('li');
-        li.textContent = `${m.from === user.uid ? 'You' : 'Them'}: ${m.text}`;
-        msgList.appendChild(li);
-      });
-    },
-    err => {
-      console.error('Messages snapshot error:', err);
-      msgList.innerHTML = `<li class="text-red-600">Error loading chat.</li>`;
-    }
-  );
+          const li = document.createElement('li');
+          const senderLabel = m.from === user.uid ? 'You' : recipientName;
+          li.textContent = `${senderLabel}: ${m.text}`;
+          msgList.appendChild(li);
+        });
 
-  // — Send new messages — 
-  msgForm?.addEventListener('submit', async e => {
-    e.preventDefault();
-    const text = msgInput.value.trim();
-    if (!text) return;
+        // ─── AUTO-SCROLL DOWN ───
+        msgList.scrollTop = msgList.scrollHeight;
+      },
+      err => {
+        console.error('Messages snapshot error:', err);
+        msgList.innerHTML = `<li class="text-red-600">Error loading chat.</li>`;
+      }
+    );
 
-    try {
-      await addDoc(collection(db, 'messages'), {
-        from:         user.uid,
-        to:           recipientId,
-        participants: [user.uid, recipientId].sort(),
-        text,
-        timestamp:    Timestamp.now()
-      });
-      msgInput.value = '';
-    } catch (writeErr) {
-      console.error('Send message error:', writeErr);
-      alert('Failed to send message.');
-    }
+    // — Send new messages — 
+    msgForm?.addEventListener('submit', async e => {
+      e.preventDefault();
+      const text = msgInput.value.trim();
+      if (!text) return;
+
+      try {
+        await addDoc(collection(db, 'messages'), {
+          from:         user.uid,
+          to:           recipientId,
+          participants: [user.uid, recipientId].sort(),
+          text,
+          timestamp:    Timestamp.now()
+        });
+        msgInput.value = '';
+      } catch (writeErr) {
+        console.error('Send message error:', writeErr);
+        alert('Failed to send message.');
+      }
+    });
+
   });
-});
+}

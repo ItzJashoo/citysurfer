@@ -5,6 +5,13 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>CitySurfer SurfBoard</title>
   <link href="https://cdn.jsdelivr.net/npm/tailwindcss@2.2.19/dist/tailwind.min.css" rel="stylesheet">
+  <style>
+    /* smooth scroll for in‐page chat lists if needed */
+    #openChatsList {
+      max-height: 200px;
+      overflow-y: auto;
+    }
+  </style>
 </head>
 <body class="bg-gray-300 flex flex-col h-screen">
 
@@ -12,6 +19,7 @@
   <header class="flex-none bg-white shadow px-4 py-3 flex items-center justify-between relative">
     <div class="flex items-center">
       <button id="btnMobileMenu" class="md:hidden mr-3 focus:outline-none">
+        <!-- hamburger icon -->
         <svg class="w-6 h-6 text-gray-700" fill="none" stroke="currentColor" viewBox="0 0 24 24">
           <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
                 d="M4 6h16M4 12h16M4 18h16" />
@@ -22,6 +30,10 @@
            class="ml-3 rounded-3xl hidden md:block" />
     </div>
     <nav class="hidden md:flex space-x-2 items-center">
+      <button id="btnMessages"
+              class="px-4 py-2 bg-green-500 text-white rounded hover:bg-green-600">
+        Messages
+      </button>
       <a id="btnProfile" href="profile.html"
          class="px-4 py-2 bg-gray-200 text-gray-700 rounded hover:bg-gray-300">Profile</a>
       <button id="btnLogout" class="px-4 py-2 bg-indigo-500 text-white rounded hover:bg-indigo-700">
@@ -30,12 +42,37 @@
     </nav>
     <nav id="mobileMenu"
          class="absolute top-full inset-x-0 bg-white shadow-md z-20 flex flex-col space-y-2 p-4 md:hidden hidden">
+      <button id="btnMessagesMobile"
+              class="px-4 py-2 bg-green-500 text-white rounded hover:bg-green-600 text-center">
+        Messages
+      </button>
       <a id="btnProfileMobile" href="profile.html"
-         class="px-4 py-2 bg-gray-200 text-gray-700 rounded hover:bg-gray-300 text-center">Profile</a>
+         class="px-4 py-2 bg-gray-200 text-gray-700 rounded hover:bg-gray-300 text-center">
+        Profile
+      </a>
       <button id="btnLogoutMobile"
-              class="px-4 py-2 bg-indigo-500 text-white rounded hover:bg-indigo-700">Log Out</button>
+              class="px-4 py-2 bg-indigo-500 text-white rounded hover:bg-indigo-700">
+        Log Out
+      </button>
     </nav>
   </header>
+
+  <!-- Messages Popup (hidden by default) -->
+  <div id="messagesModal"
+       class="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center hidden z-30">
+    <div class="bg-white rounded-lg shadow-lg max-w-sm w-full p-4">
+      <div class="flex justify-between items-center mb-4">
+        <h2 class="text-xl font-semibold">Your Messages</h2>
+        <button id="closeMessagesModal" class="text-gray-600 hover:text-gray-800 text-2xl leading-none">&times;</button>
+      </div>
+      <div id="openChats">
+        <h3 class="font-medium mb-2">Open chats</h3>
+        <ul id="openChatsList" class="list-disc list-inside text-gray-700">
+          <li>Loading…</li>
+        </ul>
+      </div>
+    </div>
+  </div>
 
   <!-- Main Content -->
   <main class="flex-1 overflow-auto bg-gray-100">
@@ -266,7 +303,7 @@
             <option value="Yemen">Yemen</option>
             <option value="Zambia">Zambia</option>
             <option value="Zimbabwe">Zimbabwe</option>
-          </select>
+           </select>
               <button type="submit"
                       class="flex-none px-4 py-2 bg-indigo-500 text-white rounded hover:bg-indigo-700">
                 Find a Guide!
@@ -320,44 +357,129 @@
     <p>© 2025 CitySurfer. All rights reserved.</p>
   </footer>
 
-  <!-- Tab + Mobile-Menu Script -->
+  <!-- UI Toggles: Tabs, Mobile Menu, Modal -->
   <script>
     document.addEventListener('DOMContentLoaded', () => {
-      const tabTravelers = document.getElementById('tabTravelers');
-      const tabGuides    = document.getElementById('tabGuides');
-      const TravelersContent = document.getElementById('TravelersContent');
-      const GuidesContent    = document.getElementById('GuidesContent');
-
+      // Tabs
+      const tabTravelers   = document.getElementById('tabTravelers');
+      const tabGuides      = document.getElementById('tabGuides');
+      const travelPanel    = document.getElementById('TravelersContent');
+      const guidesPanel    = document.getElementById('GuidesContent');
       function showTravelers() {
         tabTravelers .classList.add('border-blue-500','text-blue-600');
         tabGuides    .classList.remove('border-blue-500','text-blue-600');
-        TravelersContent.classList.remove('hidden');
-        GuidesContent   .classList.add('hidden');
+        travelPanel  .classList.remove('hidden');
+        guidesPanel  .classList.add('hidden');
       }
-
       function showGuides() {
         tabGuides    .classList.add('border-blue-500','text-blue-600');
         tabTravelers .classList.remove('border-blue-500','text-blue-600');
-        GuidesContent   .classList.remove('hidden');
-        TravelersContent.classList.add('hidden');
+        guidesPanel  .classList.remove('hidden');
+        travelPanel  .classList.add('hidden');
       }
-
-      // Default to Travelers
       showTravelers();
-
       tabTravelers.addEventListener('click', showTravelers);
       tabGuides   .addEventListener('click', showGuides);
 
-      // Mobile menu toggle
-      document.getElementById('btnMobileMenu').addEventListener('click', () => {
-        document.getElementById('mobileMenu').classList.toggle('hidden');
-      });
+      // Mobile menu
+      document.getElementById('btnMobileMenu')
+              .addEventListener('click', () => document.getElementById('mobileMenu').classList.toggle('hidden'));
       document.getElementById('btnLogoutMobile')
               .addEventListener('click', () => document.getElementById('btnLogout').click());
+
+      // Messages modal open/close
+      const modal = document.getElementById('messagesModal');
+      document.getElementById('btnMessages')
+              .addEventListener('click', () => modal.classList.remove('hidden'));
+      document.getElementById('btnMessagesMobile')
+              .addEventListener('click', () => {
+                document.getElementById('mobileMenu').classList.add('hidden');
+                modal.classList.remove('hidden');
+              });
+      document.getElementById('closeMessagesModal')
+              .addEventListener('click', () => modal.classList.add('hidden'));
     });
   </script>
 
   <!-- Dashboard Bundle -->
-  <script defer src="dashboard.bundle.js"></script>
+<script type="module">
+  // 1) Load Firebase ESM from the CDN
+  import { initializeApp } from "https://www.gstatic.com/firebasejs/9.22.1/firebase-app.js";
+  import { getAuth, onAuthStateChanged }
+    from "https://www.gstatic.com/firebasejs/9.22.1/firebase-auth.js";
+  import {
+    getFirestore, collection, query,
+    where, onSnapshot, doc, getDoc
+  } from "https://www.gstatic.com/firebasejs/9.22.1/firebase-firestore.js";
+
+  // 2) Your config
+  const firebaseConfig = {
+    apiKey:    "AIzaSyA_SIYh8CCbC12BmFOYS1VBSJLVnCBNu0c",
+    authDomain:"citysurfer-609ab.firebaseapp.com",
+    projectId: "citysurfer-609ab",
+    storageBucket: "citysurfer-609ab.appspot.com",
+    messagingSenderId: "736165172289",
+    appId:     "1:736165172289:web:0f75f82abf121cdb06e2c0",
+    measurementId: "G-7LHT92W2NX"
+  };
+
+  // 3) Init Firebase
+  const app  = initializeApp(firebaseConfig);
+  const auth = getAuth(app);
+  const db   = getFirestore(app);
+
+  // 4) DOM refs
+  const chatsList = document.getElementById('openChatsList');
+
+  onAuthStateChanged(auth, user => {
+    if (!user) return;
+
+    // — All open chats I’m in —
+    const chatQ = query(
+      collection(db, 'messages'),
+      where('participants','array-contains',user.uid)
+    );
+    onSnapshot(chatQ, async snap => {
+      // Gather all other UIDs
+      const otherUids = new Set();
+      snap.forEach(d => {
+        d.data().participants.forEach(id => {
+          if (id !== user.uid) otherUids.add(id);
+        });
+      });
+
+      chatsList.innerHTML = '';
+      if (otherUids.size === 0) {
+        chatsList.innerHTML = '<li>No open chats.</li>';
+        return;
+      }
+
+      // For each UID, fetch their display name
+      const fetches = Array.from(otherUids).map(async uid => {
+        try {
+          const userDoc = await getDoc(doc(db, 'users', uid));
+          return userDoc.exists() ? userDoc.data().name : uid;
+        } catch {
+          return uid;
+        }
+      });
+
+      const names = await Promise.all(fetches);
+
+      // Render
+      names.forEach((name, idx) => {
+        const uid = Array.from(otherUids)[idx];
+        const li = document.createElement('li');
+        const a  = document.createElement('a');
+        a.href        = `inbox.html?uid=${uid}`;
+        a.textContent = name;
+        a.className   = 'text-blue-600 hover:underline';
+        li.appendChild(a);
+        chatsList.appendChild(li);
+      });
+    });
+  });
+</script>
+
 <script defer src="dashboard.bundle.js"></script></body>
 </html>

@@ -9,16 +9,33 @@
     href="https://cdn.jsdelivr.net/npm/tailwindcss@2.2.19/dist/tailwind.min.css"
     rel="stylesheet"
   />
+  <style>
+    /* smooth scroll so auto-scroll looks natural */
+    #messageList {
+      scroll-behavior: smooth;
+    }
+  </style>
 </head>
 <body class="p-6 font-sans bg-gray-100">
 
-  <h1 class="text-2xl font-semibold mb-4">Chat Inbox</h1>
+  <!-- Header -->
+  <header class="flex items-center justify-between mb-6">
+    <h1 class="text-2xl font-semibold">Chat Inbox</h1>
+    <a
+      href="dashboard.html"
+      class="bg-gray-300 hover:bg-gray-400 text-gray-800 font-medium py-2 px-4 rounded"
+    >
+      Return to SurfBoard
+    </a>
+  </header>
 
+  <!-- Messages -->
   <ul
     id="messageList"
     class="bg-white p-4 rounded shadow mb-4 space-y-2 max-h-[60vh] overflow-y-auto"
   ></ul>
 
+  <!-- Message form -->
   <form id="messageForm" class="flex gap-2">
     <input
       id="messageInput"
@@ -32,7 +49,7 @@
     </button>
   </form>
 
-  <!-- *** Only this one script *** -->
+  <!-- Only this one script -->
   <script defer src="inbox.bundle.js"></script>
 </body>
 </html>
