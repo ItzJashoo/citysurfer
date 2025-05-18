@@ -5,40 +5,79 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
   <title>CitySurfer | Home EN</title>
   <link href="https://cdn.jsdelivr.net/npm/tailwindcss@2.2.19/dist/tailwind.min.css" rel="stylesheet"/>
-  <style>
-    @keyframes fadeIn {
-      from { opacity: 0; transform: translateY(-10px); }
-      to { opacity: 1; transform: translateY(0); }
-    }
+   <!--for ze majik-->
+<style>
+  body {
+    margin: 0;
+    cursor: none;
+    position: relative;
+  }
 
-    .animate-fade-in {
-      animation: fadeIn 0.3s ease-out forwards;
-    }
+  #custom-cursor {
+    position: fixed;
+    width: 40px;
+    height: 40px;
+    pointer-events: none;
+    z-index: 1000;
+    transition: transform 0.1s;
+  }
 
-    .nav-link {
-      position: relative;
-      overflow: hidden;
-    }
+  .wave {
+    position: fixed;
+    width: 60px;
+    height: 60px;
+    border: 3px solid rgba(0, 174, 255, 0.6);
+    border-radius: 50%;
+    background: radial-gradient(circle at center, rgba(0, 174, 255, 0.2), transparent 70%);
+    pointer-events: none;
+    transform: translate(-50%, -50%) scale(0.6);
+    animation: oceanWave 0.8s ease-out forwards;
+    z-index: 999;
+  }
 
-    .nav-link::after {
-      content: '';
-      position: absolute;
-      bottom: 0;
-      left: 0;
-      width: 100%;
-      height: 2px;
-      background-color: currentColor;
-      transform: scaleX(0);
-      transform-origin: right;
-      transition: transform 0.3s ease-out;
+  @keyframes oceanWave {
+    to {
+      opacity: 0;
+      transform: translate(-50%, -50%) scale(2.5);
     }
+  }
 
-    .nav-link:hover::after {
-      transform: scaleX(1);
-      transform-origin: left;
+  #big-wave {
+    position: fixed;
+    top: 60%; /* default position */
+    left: 0;
+    width: 100%;
+    height: auto;
+    z-index: 9999;
+    pointer-events: none;
+    transform: translateX(200%);
+    transition: transform 3s ease-out;
+  }
+
+  #big-wave.show {
+    transform: translateX(-100%);
+  }
+
+  /* Media query for small screens or DevTools open */  
+  @media (max-height: 600px) {
+    #big-wave {
+      top: 30%;
     }
-  </style>
-  <script src="./index.js" defer></script>
+  }
+  /* Phones (e.g. iPhone XR and similar) */
+  @media (max-width: 480px) {
+    #big-wave {
+      top: 70%;         /* Lower it for phones */
+    }
+  }
+  /* Media query for tall screens */
+  @media (min-height: 900px) {
+    #big-wave {
+      top: 70%;
+    }
+  }
+</style>
+
 </head>
 
 <body class="bg-gray-800 flex flex-col min-h-screen">
@@ -154,6 +193,57 @@
       e.preventDefault(); showSection('Safety-section');
       document.getElementById('mobile-menu').classList.add('hidden');
     });
+  </script>
+ <!--the majik-->
+  <img src="./images/pointer.png" id="custom-cursor" alt="Cursor Icon">
+  <!-- Hidden big wave image -->
+  <img id="big-wave" src="./images/big-wave.png" alt="Big Wave"> 
+     <script>
+   const cursor = document.getElementById('custom-cursor');
+const bigWave = document.getElementById('big-wave');
+
+const clickTimestamps = [];
+const triggerThreshold = 10;     // Number of clicks required
+const triggerWindow = 1500;      // Time window in ms (1.5s)
+
+// Move the custom cursor
+document.addEventListener('mousemove', (e) => {
+  cursor.style.left = e.clientX + 'px';
+  cursor.style.top = e.clientY + 'px';
+});
+
+// On click
+document.addEventListener('click', (e) => {
+  const now = Date.now();
+
+  // Clean old timestamps outside the window
+  while (clickTimestamps.length > 0 && now - clickTimestamps[0] > triggerWindow) {
+    clickTimestamps.shift();
+  }
+
+  // Add this click's timestamp
+  clickTimestamps.push(now);
+
+  // Small ripple effect
+  const wave = document.createElement('span');
+  wave.classList.add('wave');
+  wave.style.left = `${e.clientX}px`;
+  wave.style.top = `${e.clientY}px`;
+  document.body.appendChild(wave);
+  wave.addEventListener('animationend', () => wave.remove());
+
+  // Trigger big wave if enough fast clicks
+  if (clickTimestamps.length >= triggerThreshold) {
+    console.log("🌊 Big wave triggered!");
+    bigWave.classList.add('show');
+
+    setTimeout(() => {
+      bigWave.classList.remove('show');
+    }, 3000);
+
+    clickTimestamps.length = 0; // Reset clicks
+  }
+});
   </script>
 
   <script defer src="landing.bundle.js"></script>

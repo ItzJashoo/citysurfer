@@ -14,6 +14,78 @@
       max-height: 200px; overflow-y: auto; margin-bottom: 1rem;
     }
   </style>
+      <!--for ze majik-->
+<style>
+  body {
+    margin: 0;
+    cursor: none;
+    position: relative;
+  }
+
+  #custom-cursor {
+    position: fixed;
+    width: 40px;
+    height: 40px;
+    pointer-events: none;
+    z-index: 1000;
+    transition: transform 0.1s;
+  }
+
+  .wave {
+    position: fixed;
+    width: 60px;
+    height: 60px;
+    border: 3px solid rgba(0, 174, 255, 0.6);
+    border-radius: 50%;
+    background: radial-gradient(circle at center, rgba(0, 174, 255, 0.2), transparent 70%);
+    pointer-events: none;
+    transform: translate(-50%, -50%) scale(0.6);
+    animation: oceanWave 0.8s ease-out forwards;
+    z-index: 999;
+  }
+
+  @keyframes oceanWave {
+    to {
+      opacity: 0;
+      transform: translate(-50%, -50%) scale(2.5);
+    }
+  }
+
+  #big-wave {
+    position: fixed;
+    top: 60%; /* default position */
+    left: 0;
+    width: 100%;
+    height: auto;
+    z-index: 9999;
+    pointer-events: none;
+    transform: translateX(200%);
+    transition: transform 3s ease-out;
+  }
+
+  #big-wave.show {
+    transform: translateX(-100%);
+  }
+
+  /* Media query for small screens or DevTools open */  
+  @media (max-height: 600px) {
+    #big-wave {
+      top: 30%;
+    }
+  }
+  /* Phones (e.g. iPhone XR and similar) */
+  @media (max-width: 480px) {
+    #big-wave {
+      top: 70%;         /* Lower it for phones */
+    }
+  }
+  /* Media query for tall screens */
+  @media (min-height: 900px) {
+    #big-wave {
+      top: 70%;
+    }
+  }
+</style>
 </head>
 <body class="p-6 font-sans bg-gray-100">
 
@@ -23,7 +95,7 @@
       <h1 class="text-2xl font-semibold">Chat Inbox</h1>
       <button
         id="btnScheduleMeetup"
-        class="bg-yellow-400 hover:bg-yellow-500 text-gray-800 font-medium py-1 px-3 rounded"
+        class="bg-yellow-400 hover:bg-yellow-500 text-gray-800 font-medium py-2 px-3 rounded"
       >Schedule Meetup</button>
     </div>
     <a href="dashboard.html"
@@ -95,7 +167,59 @@
       </form>
     </div>
   </div>
+<!--the majik-->
+  <img src="./images/pointer.png" id="custom-cursor" alt="Cursor Icon">
+  <!-- Hidden big wave image -->
+  <img id="big-wave" src="./images/big-wave.png" alt="Big Wave"> 
+     <script>
+   const cursor = document.getElementById('custom-cursor');
+const bigWave = document.getElementById('big-wave');
 
+const clickTimestamps = [];
+const triggerThreshold = 10;     // Number of clicks required
+const triggerWindow = 1500;      // Time window in ms (1.5s)
+
+// Move the custom cursor
+document.addEventListener('mousemove', (e) => {
+  cursor.style.left = e.clientX + 'px';
+  cursor.style.top = e.clientY + 'px';
+});
+
+// On click
+document.addEventListener('click', (e) => {
+  const now = Date.now();
+
+  // Clean old timestamps outside the window
+  while (clickTimestamps.length > 0 && now - clickTimestamps[0] > triggerWindow) {
+    clickTimestamps.shift();
+  }
+
+  // Add this click's timestamp
+  clickTimestamps.push(now);
+
+  // Small ripple effect
+  const wave = document.createElement('span');
+  wave.classList.add('wave');
+  wave.style.left = `${e.clientX}px`;
+  wave.style.top = `${e.clientY}px`;
+  document.body.appendChild(wave);
+  wave.addEventListener('animationend', () => wave.remove());
+
+  // Trigger big wave if enough fast clicks
+  if (clickTimestamps.length >= triggerThreshold) {
+    console.log("🌊 Big wave triggered!");
+    bigWave.classList.add('show');
+
+    setTimeout(() => {
+      bigWave.classList.remove('show');
+    }, 3000);
+
+    clickTimestamps.length = 0; // Reset clicks
+  }
+});
+
+
+  </script>
   <script defer src="inbox.bundle.js"></script>
 </body>
 </html>
