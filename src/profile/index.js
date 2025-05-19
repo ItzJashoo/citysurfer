@@ -169,11 +169,13 @@ document.addEventListener('DOMContentLoaded', () => {
     if (!currentUser) return;
 
     const profileData = {
-      name:         nameInput.value.trim(),
-      age:          parseInt(ageInput.value.trim()) || null,
-      homelocation: `${cityInput.value.trim()}, ${countryInput.value.trim()}`.replace(/^,|,$/g,'').trim(),
-      bio:          bioInput.value.trim()
-    };
+    name:         nameInput.value.trim(),
+    age:          parseInt(ageInput.value.trim()) || null,
+    homelocation: `${cityInput.value.trim()}, ${countryInput.value.trim()}`.replace(/^,|,$/g,'').trim(),
+    bio:          bioInput.value.trim(),
+    email:        currentUser.email  // Add this line
+  };
+
 
     const file = pictureInput.files[0];
     if (file) {

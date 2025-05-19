@@ -12,15 +12,7 @@ import {
 } from 'firebase/firestore';
 
 // ——— Firebase init ———
-const firebaseConfig = {
-  apiKey: "AIzaSyA_SIYh8CCbC12BmFOYS1VBSJLVnCBNu0c",
-  authDomain: "citysurfer-609ab.firebaseapp.com",
-  projectId: "citysurfer-609ab",
-  storageBucket: "citysurfer-609ab.appspot.com",
-  messagingSenderId: "736165172289",
-  appId: "1:736165172289:web:0f75f82abf121cdb06e2c0",
-  measurementId: "G-7LHT92W2NX"
-};
+import { auth, db } from '../firebase.js';
 
 let firebaseApp;
 if (!window.__firebaseInitialized) {
@@ -37,8 +29,6 @@ if (!window.__firebaseInitialized) {
   firebaseApp = getApp();
 }
 
-const auth = getAuth(firebaseApp);
-const db = getFirestore(firebaseApp);
 
 // ——— UI refs ———
 const msgForm = document.getElementById('messageForm');
@@ -86,16 +76,14 @@ onAuthStateChanged(auth, async user => {
     const address = inputAddress.value;
 
     try {
-      await addDoc(collection(db, 'meetupRequests'), {
-        from: auth.currentUser.uid,
-        to: recipientId,
-        participants: [auth.currentUser.uid, recipientId],
-        date,
-        address,
-        time,
-        status: 'pending',
-        timestamp: Timestamp.now()
-      });
+      await addDoc(collection(db, 'messages'), {
+      from: user.uid,
+      to: recipientId,
+      participants: [user.uid, recipientId].sort(),
+      text,
+      timestamp: Timestamp.now()
+    });
+
       alert('Meetup request sent!');
       modal.classList.add('hidden');
       meetupForm.reset();

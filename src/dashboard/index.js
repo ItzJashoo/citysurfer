@@ -1,15 +1,14 @@
 import '../css/styles.css';
 import { btnLogout } from './ui.js';
 
-import { initializeApp } from 'firebase/app';
+// ——— Import your single-source Firebase instances ———
+import { auth, db } from '../firebase.js';
+
 import {
-  getAuth,
   signOut,
   onAuthStateChanged,
 } from 'firebase/auth';
-
 import {
-  getFirestore,
   doc,
   getDoc,
   updateDoc,
@@ -19,21 +18,8 @@ import {
   getDocs
 } from 'firebase/firestore';
 
-// ——— Firebase init ———
-const firebaseApp = initializeApp({
-  apiKey:    "AIzaSyA_SIYh8CCbC12BmFOYS1VBSJLVnCBNu0c",
-  authDomain:"citysurfer-609ab.firebaseapp.com",
-  projectId: "citysurfer-609ab",
-  storageBucket: "citysurfer-609ab.appspot.com",
-  messagingSenderId: "736165172289",
-  appId:     "1:736165172289:web:0f75f82abf121cdb06e2c0",
-  measurementId: "G-7LHT92W2NX"
-});
-const auth = getAuth(firebaseApp);
-const db   = getFirestore(firebaseApp);
-
 // ——— Logout ———
-btnLogout.addEventListener('click', async () => {
+btnLogout?.addEventListener('click', async () => {
   await signOut(auth);
   window.location.href = 'login.html';
 });
@@ -43,6 +29,7 @@ const tabTravelers     = document.getElementById('tabTravelers');
 const tabGuides        = document.getElementById('tabGuides');
 const TravelersContent = document.getElementById('TravelersContent');
 const GuidesContent    = document.getElementById('GuidesContent');
+
 function showTravelersTab() {
   tabTravelers.classList.add('border-blue-500','text-blue-600');
   tabGuides.classList.remove('border-blue-500','text-blue-600');
@@ -55,6 +42,7 @@ function showGuidesTab() {
   GuidesContent.classList.remove('hidden');
   TravelersContent.classList.add('hidden');
 }
+
 document.addEventListener('DOMContentLoaded', () => {
   showTravelersTab();
   tabTravelers.addEventListener('click', showTravelersTab);
@@ -142,32 +130,28 @@ onAuthStateChanged(auth, async user => {
         const q = query(collection(db,'users'), where('location','==',home));
         const results = await getDocs(q);
         ul.innerHTML = '';
-        if (results.empty) {
-          ul.innerHTML = '<li>No travelers in your area yet.</li>';
-        } else {
-          let count = 0;
-          results.forEach(ds => {
-            if (ds.id === user.uid) return; // skip yourself
-            const d = ds.data();
-            const name = d.name || d.email || 'Unnamed';
+        let count = 0;
+        results.forEach(ds => {
+          if (ds.id === user.uid) return; // skip yourself
+          const d = ds.data();
+          const name = d.name || d.email || 'Unnamed';
 
-            const li = document.createElement('li');
-            li.textContent = name;
+          const li = document.createElement('li');
+          li.textContent = name;
 
-            const btnMsg = document.createElement('button');
-            btnMsg.textContent = 'Message';
-            btnMsg.classList.add('ml-2','text-blue-500','underline');
-            btnMsg.addEventListener('click', () => {
-              window.location.href = `inbox.html?uid=${ds.id}`;
-            });
-
-            li.appendChild(btnMsg);
-            ul.appendChild(li);
-            count++;
+          const btnMsg = document.createElement('button');
+          btnMsg.textContent = 'Message';
+          btnMsg.classList.add('ml-2','text-blue-500','underline');
+          btnMsg.addEventListener('click', () => {
+            window.location.href = `inbox.html?uid=${ds.id}`;
           });
-          if (count === 0) {
-            ul.innerHTML = '<li>No other travelers found.</li>';
-          }
+
+          li.appendChild(btnMsg);
+          ul.appendChild(li);
+          count++;
+        });
+        if (count === 0) {
+          ul.innerHTML = '<li>No other travelers found.</li>';
         }
       }
     } catch(err) {
@@ -176,7 +160,7 @@ onAuthStateChanged(auth, async user => {
     }
   }
 
-  // — Inbox Name Display (replace UID with sender's name) —
+  // — Inbox Name Display —
   const inboxList = document.getElementById('inboxList');
   if (inboxList) {
     try {
@@ -188,19 +172,15 @@ onAuthStateChanged(auth, async user => {
       } else {
         for (const docSnap of inboxSnap.docs) {
           const msg = docSnap.data();
-          const senderId = msg.from;
-
-          // Get sender's name
-          let senderName = senderId;
+          let senderName = msg.from;
           try {
-            const senderSnap = await getDoc(doc(db, 'users', senderId));
+            const senderSnap = await getDoc(doc(db, 'users', senderName));
             if (senderSnap.exists()) {
-              senderName = senderSnap.data().name || senderId;
+              senderName = senderSnap.data().name || senderName;
             }
-          } catch (err) {
-            console.warn('Could not fetch sender name:', err);
+          } catch {
+            console.warn('Could not fetch sender name');
           }
-
           const li = document.createElement('li');
           li.textContent = `From ${senderName}: ${msg.text}`;
           inboxList.appendChild(li);
