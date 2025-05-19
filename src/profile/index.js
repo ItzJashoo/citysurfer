@@ -11,7 +11,8 @@ import {
   getFirestore,
   doc,
   getDoc,
-  updateDoc
+  updateDoc,
+  setDoc
 } from 'firebase/firestore';
 
 // --- Firebase config & init ---

@@ -120,4 +120,16 @@ document.addEventListener('DOMContentLoaded', () => {
       resetMessage.textContent = err.message;
     }
   });
+
+  // 👉 Forgot password dropdown toggle
+  const actionSelect = document.getElementById('actionSelect');
+  const resetGroup = document.getElementById('resetGroup');
+
+  actionSelect?.addEventListener('change', () => {
+    if (actionSelect.value === 'forgot') {
+      resetGroup.style.display = 'flex';
+    } else {
+      resetGroup.style.display = 'none';
+    }
+  });
 });
