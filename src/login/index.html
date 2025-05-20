@@ -10,112 +10,57 @@
 
   <style>
     /* Floating label inputs */
-    .group {
-      position: relative;
-      margin: 2rem auto;
-      width: 90%;
-      max-width: 400px;
-    }
+    .group { position: relative; margin: 2rem auto; width: 90%; max-width: 400px; }
     .group input {
-      width: 100%;
-      padding: 14px 12px;
-      border: 1px solid #ccc;
-      border-radius: 6px;
-      background: none;
-      font-size: 16px;
-      box-sizing: border-box;
+      width: 100%; padding: 14px 12px; border: 1px solid #ccc;
+      border-radius: 6px; background: none; font-size: 16px; box-sizing: border-box;
     }
     .group label {
-      position: absolute;
-      left: 14px;
-      top: 50%;
-      transform: translateY(-50%);
-      color: #aaa;
-      pointer-events: none;
-      transition: 0.2s ease all;
-      background-color: white;
-      padding: 0 4px;
+      position: absolute; left: 14px; top: 50%;
+      transform: translateY(-50%); color: #aaa;
+      pointer-events: none; transition: 0.2s ease all;
+      background-color: white; padding: 0 4px;
     }
     .group input:focus + label,
     .group input:not(:placeholder-shown) + label {
-      top: -10px;
-      left: 10px;
-      font-size: 12px;
-      color: #333;
+      top: -10px; left: 10px; font-size: 12px; color: #333;
     }
 
     /* Custom cursor & wave styles */
-    body {
-      margin: 0;
-      cursor: none;
-      position: relative;
-    }
+    body { margin: 0; cursor: none; position: relative; }
     #custom-cursor {
-      position: fixed;
-      width: 40px;
-      height: 40px;
-      pointer-events: none;
-      z-index: 1000;
-      transition: transform 0.1s;
+      position: fixed; width: 40px; height: 40px;
+      pointer-events: none; z-index: 1000; transition: transform 0.1s;
     }
     .wave {
-      position: fixed;
-      width: 60px;
-      height: 60px;
-      border: 3px solid rgba(0, 174, 255, 0.6);
-      border-radius: 50%;
+      position: fixed; width: 60px; height: 60px;
+      border: 3px solid rgba(0, 174, 255, 0.6); border-radius: 50%;
       background: radial-gradient(circle at center, rgba(0, 174, 255, 0.2), transparent 70%);
-      pointer-events: none;
-      transform: translate(-50%, -50%) scale(0.6);
-      animation: oceanWave 0.8s ease-out forwards;
-      z-index: 999;
+      pointer-events: none; transform: translate(-50%, -50%) scale(0.6);
+      animation: oceanWave 0.8s ease-out forwards; z-index: 999;
     }
     @keyframes oceanWave {
-      to {
-        opacity: 0;
-        transform: translate(-50%, -50%) scale(2.5);
-      }
+      to { opacity: 0; transform: translate(-50%, -50%) scale(2.5); }
     }
     #big-wave {
-      position: fixed;
-      top: 60%;
-      left: 0;
-      width: 100%;
-      height: auto;
-      z-index: 9999;
-      pointer-events: none;
-      transform: translateX(200%);
+      position: fixed; top: 60%; left: 0; width: 100%; height: auto;
+      z-index: 9999; pointer-events: none; transform: translateX(200%);
       transition: transform 3s ease-out;
     }
-    #big-wave.show {
-      transform: translateX(-100%);
-    }
-    @media (max-height: 600px) {
-      #big-wave { top: 30%; }
-    }
-    @media (max-width: 480px) {
-      #big-wave { top: 70%; }
-    }
-    @media (min-height: 900px) {
-      #big-wave { top: 70%; }
-    }
+    #big-wave.show { transform: translateX(-100%); }
+    @media (max-height: 600px) { #big-wave { top: 30%; } }
+    @media (max-width: 480px) { #big-wave { top: 70%; } }
+    @media (min-height: 900px) { #big-wave { top: 70%; } }
 
-    /* Button styles (example) */
+    /* Button styles */
     .buttonBlue {
-      background: #007bff;
-      color: white;
-      border: none;
-      padding: 0.75rem 1.5rem;
-      border-radius: 4px;
-      cursor: pointer;
-      font-size: 1rem;
+      background: #007bff; color: white; border: none;
+      padding: 0.75rem 1.5rem; border-radius: 4px;
+      cursor: pointer; font-size: 1rem;
     }
-    .buttonBlue:hover {
-      background: #0056b3;
-    }
+    .buttonBlue:hover { background: #0056b3; }
   </style>
 </head>
-
 <body>
   <div id="login">
     <div style="text-align: center; margin-top: 2rem;">
@@ -130,7 +75,6 @@
       />
     </div>
 
-    <!-- Inputs are wrapped in a form purely for grouping, but buttons live outside -->
     <form id="loginForm">
       <div class="group">
         <input id="txtEmail" type="email" placeholder=" " />
@@ -145,7 +89,6 @@
       </div>
     </form>
 
-    <!-- Move buttons outside the <form> so no implicit submit occurs -->
     <div style="text-align: center; margin-top: 1rem;">
       <button id="btnLogin" type="button" class="buttonBlue" style="margin-right: 1rem;">
         Log in
@@ -155,20 +98,23 @@
       </button>
     </div>
 
-    <!-- Forgot password dropdown -->
-    <div class="mt-4 flex flex-col items-center" style="margin-top:1rem; text-align:center;">
+    <div style="margin-top:1rem; text-align:center;">
       <select id="actionSelect" class="p-2 border rounded mb-2">
-      <option value="">Forgot Password?</option>
-      <option value="forgot">Send Email Link to Reset</option>
-    </select>
-    <div id="resetGroup" style="display: none; flex-direction: column; align-items: center;">
-      <input type="email" id="resetEmail" placeholder="Enter your email" class="w-24 p-2 border rounded mb-2" />
-      <button id="btnReset" class="px-2 py-1 text-sm rounded bg-blue-600 text-white hover:bg-blue-700">
-        Send Reset Email
-      </button>
-      <p id="resetMessage" class="text-sm mt-2 text-green-400"></p>
-    </div>
-
+        <option value="">Forgot Password?</option>
+        <option value="forgot">Send Email Link to Reset</option>
+      </select>
+      <div id="resetGroup" style="display: none; flex-direction: column; align-items: center;">
+        <input
+          type="email"
+          id="resetEmail"
+          placeholder="Enter your email"
+          class="w-24 p-2 border rounded mb-2"
+        />
+        <button id="btnReset" type="button" class="px-2 py-1 text-sm rounded bg-blue-600 text-white hover:bg-blue-700">
+          Send Reset Email
+        </button>
+        <p id="resetMessage" class="text-sm mt-2 text-green-400"></p>
+      </div>
     </div>
   </div>
 
@@ -177,53 +123,16 @@
     <p>
       Contact us:
       <a href="mailto:zhangjason831@gmail.com">
-        <img src="images/email.png" alt="email icon"
-             width="15" height="15" style="vertical-align:middle;"/>
+        <img src="images/email.png" alt="email icon" width="15" height="15" style="vertical-align:middle;"/>
       </a>
     </p>
   </footer>
 
-  <!-- Prevent native form submission (just in case) -->
-  <script>
-    document.getElementById('loginForm')
-            .addEventListener('submit', e => e.preventDefault());
-  </script>
+  <!-- Custom cursor & wave images -->
+  <img src="images/pointer.png" id="custom-cursor" alt="Cursor Icon" />
+  <img id="big-wave" src="images/big-wave.png" alt="Big Wave" />
 
-  <!-- Custom cursor & wave scripts -->
-  <img src="./images/pointer.png" id="custom-cursor" alt="Cursor Icon">
-  <img id="big-wave" src="./images/big-wave.png" alt="Big Wave">
-  <script>
-    const cursor = document.getElementById('custom-cursor');
-    const bigWave = document.getElementById('big-wave');
-    const clicks = [];
-    const threshold = 10;
-    const windowMs = 1500;
-
-    document.addEventListener('mousemove', e => {
-      cursor.style.left = e.clientX + 'px';
-      cursor.style.top = e.clientY + 'px';
-    });
-    document.addEventListener('click', e => {
-      const now = Date.now();
-      while (clicks.length && now - clicks[0] > windowMs) clicks.shift();
-      clicks.push(now);
-
-      const wave = document.createElement('span');
-      wave.className = 'wave';
-      wave.style.left = `${e.clientX}px`;
-      wave.style.top  = `${e.clientY}px`;
-      document.body.appendChild(wave);
-      wave.addEventListener('animationend', () => wave.remove());
-
-      if (clicks.length >= threshold) {
-        bigWave.classList.add('show');
-        setTimeout(() => bigWave.classList.remove('show'), 3000);
-        clicks.length = 0;
-      }
-    });
-  </script>
-
-  <!-- Your bundled Firebase + auth logic -->
+  <!-- Only load your bundled JS -->
   <script defer src="login.bundle.js"></script>
 </body>
 </html>

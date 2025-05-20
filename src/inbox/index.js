@@ -1,230 +1,270 @@
+// src/inbox/index.js
+
 import '../css/styles.css';
 import { btnLogout } from './ui.js';
 
-import { initializeApp, getApps, getApp } from 'firebase/app';
+import { signOut, onAuthStateChanged } from 'firebase/auth';
 import {
-  getAuth, signOut, onAuthStateChanged
-} from 'firebase/auth';
-import {
-  getFirestore,
-  collection, query, where, orderBy, onSnapshot,
-  addDoc, doc, getDoc, updateDoc, Timestamp
+  collection,
+  query,
+  where,
+  orderBy,
+  onSnapshot,
+  addDoc,
+  doc,
+  getDoc,
+  updateDoc,
+  Timestamp
 } from 'firebase/firestore';
 
-// ——— Firebase init ———
 import { auth, db } from '../firebase.js';
 
-let firebaseApp;
-if (!window.__firebaseInitialized) {
-  window.__firebaseInitialized = true;
-  if (!getApps().length) {
-    console.log('Initializing Firebase…');
-    firebaseApp = initializeApp(firebaseConfig);
-  } else {
-    console.log('Re-using existing Firebase app');
-    firebaseApp = getApp();
-  }
-} else {
-  console.log('Firebase init skipped');
-  firebaseApp = getApp();
-}
+document.addEventListener('DOMContentLoaded', () => {
+  const msgForm = document.getElementById('messageForm');
+  const msgInput = document.getElementById('messageInput');
+  const msgList = document.getElementById('messageList');
+  const params = new URLSearchParams(window.location.search);
+  const recipientId = params.get('uid');
 
-
-// ——— UI refs ———
-const msgForm = document.getElementById('messageForm');
-const msgInput = document.getElementById('messageInput');
-const msgList = document.getElementById('messageList');
-const btnSchedule = document.getElementById('btnScheduleMeetup');
-const pendingList = document.getElementById('pendingMeetupsList');
-const confirmedList = document.getElementById('confirmedMeetupsList');
-const params = new URLSearchParams(window.location.search);
-const recipientId = params.get('uid');
-
-btnLogout?.addEventListener('click', async () => {
-  await signOut(auth);
-  window.location.replace('login.html');
-});
-
-onAuthStateChanged(auth, async user => {
-  if (!user) return window.location.replace('login.html');
-  if (!recipientId) return console.error('No recipientId');
-
-  // 1) Schedule Meetup → create meetupRequests doc
-  // Open modal on button click
-  btnSchedule?.addEventListener('click', () => {
-    document.getElementById('meetupModal').classList.remove('hidden');
-  });
-
+  const btnSchedule = document.getElementById('btnScheduleMeetup');
+  const meetupModal = document.getElementById('meetupModal');
   const meetupForm = document.getElementById('meetupForm');
   const cancelBtn = document.getElementById('cancelMeetup');
-  const modal = document.getElementById('meetupModal');
   const inputDate = document.getElementById('meetupDate');
   const inputTime = document.getElementById('meetupTime');
   const inputAddress = document.getElementById('meetupAddress');
 
-  // Cancel modal
-  cancelBtn?.addEventListener('click', () => {
-    modal.classList.add('hidden');
-    meetupForm.reset();
-  });
-
-  // Submit meetup form
-  meetupForm?.addEventListener('submit', async e => {
-    e.preventDefault();
-    const date = inputDate.value;
-    const time = inputTime.value;
-    const address = inputAddress.value;
-
-    try {
-      await addDoc(collection(db, 'messages'), {
-      from: user.uid,
-      to: recipientId,
-      participants: [user.uid, recipientId].sort(),
-      text,
-      timestamp: Timestamp.now()
-    });
-
-      alert('Meetup request sent!');
-      modal.classList.add('hidden');
-      meetupForm.reset();
-    } catch (err) {
-      console.error('Error sending request:', err);
-      alert('Failed to send meetup request');
-    }
-  });
-
-  // 2) Pending requests **to** me
-  const pendingQ = query(
-    collection(db, 'meetupRequests'),
-    where('to', '==', user.uid),
-    where('status', '==', 'pending'),
-    orderBy('timestamp', 'asc')
-  );
-  onSnapshot(pendingQ, snap => {
-    pendingList.innerHTML = '';
-    if (snap.empty) {
-      pendingList.innerHTML = '<li>No pending meetups.</li>';
-    } else {
-      snap.forEach(d => {
-        const r = d.data();
-        const li = document.createElement('li');
-        li.innerHTML = `
-          ${r.date} @ ${r.time}, ${r.address}
-          <button data-id="${d.id}" class="accept ml-2 px-2 py-1 bg-green-500 text-white rounded">Accept</button>
-          <button data-id="${d.id}" class="reject ml-1 px-2 py-1 bg-red-500 text-white rounded">Reject</button>
-        `;
-        pendingList.appendChild(li);
-      });
-      pendingList.querySelectorAll('.accept').forEach(btn =>
-        btn.addEventListener('click', async e => {
-          await updateDoc(doc(db, 'meetupRequests', e.target.dataset.id), { status: 'accepted' });
-        })
-      );
-      pendingList.querySelectorAll('.reject').forEach(btn =>
-        btn.addEventListener('click', async e => {
-          await updateDoc(doc(db, 'meetupRequests', e.target.dataset.id), { status: 'rejected' });
-        })
-      );
-    }
-  });
-
-  // 2.5) Outgoing meetup requests I sent (without cancel button)
+  const pendingList = document.getElementById('pendingMeetupsList');
   const outgoingList = document.getElementById('outgoingMeetupsList');
-  const outgoingQ = query(
-    collection(db, 'meetupRequests'),
-    where('from', '==', user.uid),
-    where('status', '==', 'pending'),
-    orderBy('timestamp', 'asc')
-  );
+  const confirmedList = document.getElementById('confirmedMeetupsList');
 
-  onSnapshot(outgoingQ, snap => {
-    outgoingList.innerHTML = '';
-    if (snap.empty) {
-      outgoingList.innerHTML = '<li>No outgoing requests.</li>';
-    } else {
-      snap.forEach(d => {
-        const r = d.data();
-        const li = document.createElement('li');
-        li.textContent = `${r.date} @ ${r.time}, ${r.address}`;
-        outgoingList.appendChild(li);
-      });
-    }
+  btnLogout?.addEventListener('click', async () => {
+    await signOut(auth);
+    window.location.replace('login.html');
   });
 
-  // 3) Confirmed meetups between us
-  const confirmedList = document.getElementById('confirmedMeetupsList');
-  let confirmedCache = {};
-
-  function renderConfirmed() {
-    confirmedList.innerHTML = '';
-    const meetings = Object.values(confirmedCache).filter(r =>
-      r.participants.includes(recipientId)
-    );
-    if (meetings.length === 0) {
-      confirmedList.innerHTML = '<li>No confirmed meetups.</li>';
+  onAuthStateChanged(auth, async user => {
+    if (!user) {
+      window.location.replace('login.html');
       return;
     }
-    meetings.sort((a, b) => a.timestamp.toMillis() - b.timestamp.toMillis());
-    for (const r of meetings) {
-      const li = document.createElement('li');
-      li.textContent = `${r.date} @ ${r.time}, ${r.address}`;
-      confirmedList.appendChild(li);
+
+    const me = user.uid;
+
+    const today = new Date();
+    const tomorrow = new Date(today);
+    tomorrow.setDate(today.getDate() + 1);  // <-- Changed from +2 to +1 for tomorrow
+    const oneYearFromNow = new Date(today);
+    oneYearFromNow.setFullYear(today.getFullYear() + 1);
+
+    const toLocalDateStr = date => {
+      const y = date.getFullYear();
+      const m = String(date.getMonth() + 1).padStart(2, '0');
+      const d = String(date.getDate()).padStart(2, '0');
+      return `${y}-${m}-${d}`;
+    };
+
+    inputDate.min = toLocalDateStr(tomorrow);
+    inputDate.max = toLocalDateStr(oneYearFromNow);
+
+    if (!window.__INBOX_BOUND) {
+      window.__INBOX_BOUND = true;
+
+      if (recipientId) {
+        const udoc = await getDoc(doc(db, 'users', recipientId));
+        const recipientName = udoc.exists() ? udoc.data().name : 'Them';
+
+        const chatQ = query(
+          collection(db, 'messages'),
+          where('participants', 'array-contains', me),
+          orderBy('timestamp', 'asc')
+        );
+        onSnapshot(chatQ, snap => {
+          msgList.innerHTML = '';
+          snap.forEach(d => {
+            const m = d.data();
+            if (!m.participants.includes(recipientId)) return;
+            const li = document.createElement('li');
+            li.textContent = `${m.from === me ? 'You' : recipientName}: ${m.text}`;
+            msgList.appendChild(li);
+          });
+          msgList.scrollTop = msgList.scrollHeight;
+        });
+      }
+
+      msgForm?.addEventListener('submit', async e => {
+        e.preventDefault();
+        if (!recipientId) return;
+        const text = msgInput.value.trim();
+        if (!text) return;
+        await addDoc(collection(db, 'messages'), {
+          from: me,
+          to: recipientId,
+          participants: [me, recipientId].sort(),
+          text,
+          timestamp: Timestamp.now()
+        });
+        msgInput.value = '';
+      });
+
+      btnSchedule?.addEventListener('click', () => {
+        meetupModal.classList.remove('hidden');
+      });
+      cancelBtn?.addEventListener('click', () => {
+        meetupModal.classList.add('hidden');
+        meetupForm.reset();
+      });
+
+      meetupForm?.addEventListener('submit', async e => {
+        e.preventDefault();
+        if (!recipientId) return;
+
+        const selectedDate = inputDate.valueAsDate;
+        if (!selectedDate) {
+          alert('Please select a date.');
+          return;
+        }
+
+        // Set all dates to midnight for fair comparison:
+        const selectedDateOnly = new Date(selectedDate.getFullYear(), selectedDate.getMonth(), selectedDate.getDate(), 0, 0, 0, 0);
+        const minDateOnly = new Date(tomorrow.getFullYear(), tomorrow.getMonth(), tomorrow.getDate(), 0, 0, 0, 0);
+        const maxDateOnly = new Date(oneYearFromNow.getFullYear(), oneYearFromNow.getMonth(), oneYearFromNow.getDate(), 0, 0, 0, 0);
+
+        if (selectedDateOnly < minDateOnly || selectedDateOnly > maxDateOnly) {
+          alert(`Date must be after ${toLocalDateStr(minDateOnly)} and before ${toLocalDateStr(maxDateOnly)}.`);
+          return;
+        }
+
+
+        await addDoc(collection(db, 'meetupRequests'), {
+          from: me,
+          to: recipientId,
+          participants: [me, recipientId].sort(),
+          date: inputDate.value,
+          time: inputTime.value,
+          address: inputAddress.value,
+          status: 'pending',
+          timestamp: Timestamp.now()
+        });
+
+        meetupModal.classList.add('hidden');
+        meetupForm.reset();
+        alert('Meetup request sent!');
+      });
+
+      const pendingQ = query(
+        collection(db, 'meetupRequests'),
+        where('to', '==', me),
+        where('status', '==', 'pending'),
+        orderBy('timestamp', 'asc')
+      );
+      onSnapshot(pendingQ, snap => {
+        pendingList.innerHTML = '';
+        if (snap.empty) {
+          pendingList.innerHTML = '<li>No pending meetups.</li>';
+        } else {
+          snap.forEach(d => {
+            const r = d.data();
+            const li = document.createElement('li');
+            
+            // Make the li a simple list item with text plus buttons inside
+            li.textContent = `${r.date} @ ${r.time}, ${r.address}`;
+
+            // Create button container (flex layout for buttons only)
+            const btnContainer = document.createElement('div');
+            btnContainer.style.display = 'inline-block'; // keep buttons inline after text
+            btnContainer.style.marginLeft = '10px'; // spacing after the text
+
+            const acceptBtn = document.createElement('button');
+            acceptBtn.textContent = 'Accept';
+            acceptBtn.dataset.id = d.id;
+            acceptBtn.className = 'accept bg-green-500 hover:bg-green-600 text-white px-3 py-1 rounded';
+
+            const rejectBtn = document.createElement('button');
+            rejectBtn.textContent = 'Reject';
+            rejectBtn.dataset.id = d.id;
+            rejectBtn.className = 'reject bg-red-500 hover:bg-red-600 text-white px-3 py-1 rounded';
+
+            btnContainer.appendChild(acceptBtn);
+            btnContainer.appendChild(rejectBtn);
+            li.appendChild(btnContainer);
+
+            pendingList.appendChild(li);
+          });
+
+          // Attach event listeners after buttons exist
+          pendingList.querySelectorAll('.accept').forEach(btn =>
+            btn.addEventListener('click', async () =>
+              updateDoc(doc(db, 'meetupRequests', btn.dataset.id), { status: 'accepted' })
+            )
+          );
+          pendingList.querySelectorAll('.reject').forEach(btn =>
+            btn.addEventListener('click', async () =>
+              updateDoc(doc(db, 'meetupRequests', btn.dataset.id), { status: 'rejected' })
+            )
+          );
+        }
+      });
+
+      const outgoingQ = query(
+        collection(db, 'meetupRequests'),
+        where('from', '==', me),
+        where('status', '==', 'pending'),
+        orderBy('timestamp', 'asc')
+      );
+      onSnapshot(outgoingQ, snap => {
+        outgoingList.innerHTML = '';
+        if (snap.empty) {
+          outgoingList.innerHTML = '<li>No outgoing requests.</li>';
+        } else {
+          snap.forEach(d => {
+            const r = d.data();
+            const li = document.createElement('li');
+            li.textContent = `${r.date} @ ${r.time}, ${r.address}`;
+            outgoingList.appendChild(li);
+          });
+        }
+      });
+
+      const confirmedCache = {};
+      const qToMe = query(
+        collection(db, 'meetupRequests'),
+        where('to', '==', me),
+        where('status', '==', 'accepted'),
+        orderBy('timestamp', 'asc')
+      );
+      const qFromMe = query(
+        collection(db, 'meetupRequests'),
+        where('from', '==', me),
+        where('status', '==', 'accepted'),
+        orderBy('timestamp', 'asc')
+      );
+      const renderConfirmed = () => {
+        confirmedList.innerHTML = '';
+        const meetings = Object.values(confirmedCache).filter(r =>
+          r.participants.includes(recipientId)
+        );
+        if (!meetings.length) {
+          confirmedList.innerHTML = '<li>No confirmed meetups.</li>';
+          return;
+        }
+        meetings
+          .sort((a, b) => a.timestamp.toMillis() - b.timestamp.toMillis())
+          .forEach(r => {
+            const li = document.createElement('li');
+            li.textContent = `${r.date} @ ${r.time}, ${r.address}`;
+            confirmedList.appendChild(li);
+          });
+      };
+
+      onSnapshot(qToMe, snap => {
+        snap.forEach(d => (confirmedCache[d.id] = d.data()));
+        renderConfirmed();
+      });
+      onSnapshot(qFromMe, snap => {
+        snap.forEach(d => (confirmedCache[d.id] = d.data()));
+        renderConfirmed();
+      });
     }
-  }
-
-  const qToMe = query(
-    collection(db, 'meetupRequests'),
-    where('to', '==', user.uid),
-    where('status', '==', 'accepted'),
-    orderBy('timestamp', 'asc')
-  );
-  onSnapshot(qToMe, snap => {
-    snap.forEach(d => { confirmedCache[d.id] = d.data() });
-    renderConfirmed();
-  });
-
-  const qFromMe = query(
-    collection(db, 'meetupRequests'),
-    where('from', '==', user.uid),
-    where('status', '==', 'accepted'),
-    orderBy('timestamp', 'asc')
-  );
-  onSnapshot(qFromMe, snap => {
-    snap.forEach(d => { confirmedCache[d.id] = d.data() });
-    renderConfirmed();
-  });
-
-  // 4) Existing chat logic
-  const userDoc = await getDoc(doc(db, 'users', recipientId));
-  const recipientName = userDoc.exists() ? userDoc.data().name : 'Them';
-  const chatQ = query(
-    collection(db, 'messages'),
-    where('participants', 'array-contains', user.uid),
-    orderBy('timestamp', 'asc')
-  );
-  onSnapshot(chatQ, snap => {
-    msgList.innerHTML = '';
-    snap.forEach(d => {
-      const m = d.data();
-      if (!m.participants.includes(recipientId)) return;
-      const li = document.createElement('li');
-      li.textContent = `${m.from === user.uid ? 'You' : recipientName}: ${m.text}`;
-      msgList.appendChild(li);
-    });
-    msgList.scrollTop = msgList.scrollHeight;
-  });
-
-  msgForm.addEventListener('submit', async e => {
-    e.preventDefault();
-    const text = msgInput.value.trim();
-    if (!text) return;
-    await addDoc(collection(db, 'messages'), {
-      from: user.uid,
-      to: recipientId,
-      participants: [user.uid, recipientId].sort(),
-      text,
-      timestamp: Timestamp.now()
-    });
-    msgInput.value = '';
   });
 });
