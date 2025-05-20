@@ -14,7 +14,8 @@ import {
   doc,
   getDoc,
   updateDoc,
-  Timestamp
+  Timestamp,
+  setDoc
 } from 'firebase/firestore';
 
 import { auth, db } from '../firebase.js';
@@ -53,7 +54,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
     const today = new Date();
     const tomorrow = new Date(today);
-    tomorrow.setDate(today.getDate() + 1);  // <-- Changed from +2 to +1 for tomorrow
+    tomorrow.setDate(today.getDate() + 1);
     const oneYearFromNow = new Date(today);
     oneYearFromNow.setFullYear(today.getFullYear() + 1);
 
@@ -125,7 +126,6 @@ document.addEventListener('DOMContentLoaded', () => {
           return;
         }
 
-        // Set all dates to midnight for fair comparison:
         const selectedDateOnly = new Date(selectedDate.getFullYear(), selectedDate.getMonth(), selectedDate.getDate(), 0, 0, 0, 0);
         const minDateOnly = new Date(tomorrow.getFullYear(), tomorrow.getMonth(), tomorrow.getDate(), 0, 0, 0, 0);
         const maxDateOnly = new Date(oneYearFromNow.getFullYear(), oneYearFromNow.getMonth(), oneYearFromNow.getDate(), 0, 0, 0, 0);
@@ -134,7 +134,6 @@ document.addEventListener('DOMContentLoaded', () => {
           alert(`Date must be after ${toLocalDateStr(minDateOnly)} and before ${toLocalDateStr(maxDateOnly)}.`);
           return;
         }
-
 
         await addDoc(collection(db, 'meetupRequests'), {
           from: me,
@@ -166,14 +165,11 @@ document.addEventListener('DOMContentLoaded', () => {
           snap.forEach(d => {
             const r = d.data();
             const li = document.createElement('li');
-            
-            // Make the li a simple list item with text plus buttons inside
             li.textContent = `${r.date} @ ${r.time}, ${r.address}`;
 
-            // Create button container (flex layout for buttons only)
             const btnContainer = document.createElement('div');
-            btnContainer.style.display = 'inline-block'; // keep buttons inline after text
-            btnContainer.style.marginLeft = '10px'; // spacing after the text
+            btnContainer.style.display = 'inline-block';
+            btnContainer.style.marginLeft = '10px';
 
             const acceptBtn = document.createElement('button');
             acceptBtn.textContent = 'Accept';
@@ -192,11 +188,10 @@ document.addEventListener('DOMContentLoaded', () => {
             pendingList.appendChild(li);
           });
 
-          // Attach event listeners after buttons exist
           pendingList.querySelectorAll('.accept').forEach(btn =>
-            btn.addEventListener('click', async () =>
-              updateDoc(doc(db, 'meetupRequests', btn.dataset.id), { status: 'accepted' })
-            )
+            btn.addEventListener('click', async () => {
+              await updateDoc(doc(db, 'meetupRequests', btn.dataset.id), { status: 'accepted' });
+            })
           );
           pendingList.querySelectorAll('.reject').forEach(btn =>
             btn.addEventListener('click', async () =>
@@ -264,6 +259,36 @@ document.addEventListener('DOMContentLoaded', () => {
       onSnapshot(qFromMe, snap => {
         snap.forEach(d => (confirmedCache[d.id] = d.data()));
         renderConfirmed();
+      });
+
+      const acceptedQ = query(
+        collection(db, 'meetupRequests'),
+        where('status', '==', 'accepted'),
+        where('participants', 'array-contains', me),
+        orderBy('timestamp', 'asc')
+      );
+      onSnapshot(acceptedQ, async snap => {
+        for (const d of snap.docChanges()) {
+          if (d.type !== 'added') continue;
+          const req = d.doc.data();
+          const meetupId = d.doc.id;
+          const otherUid = req.participants.find(uid => uid !== me);
+          if (!otherUid) continue;
+
+          await setDoc(doc(db, 'meetupReviewPermissions', `${meetupId}_${me}`), {
+            meetupId,
+            reviewer: me,
+            reviewee: otherUid,
+            created: Timestamp.now()
+          });
+
+          await setDoc(doc(db, 'meetupReviewPermissions', `${meetupId}_${otherUid}`), {
+            meetupId,
+            reviewer: otherUid,
+            reviewee: me,
+            created: Timestamp.now()
+          });
+        }
       });
     }
   });

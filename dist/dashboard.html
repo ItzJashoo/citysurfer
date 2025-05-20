@@ -386,9 +386,11 @@
           <!-- Upcoming & Past Trips -->
           <div class="grid grid-cols-1 md:grid-cols-2 gap-4 mt-6">
             <div class="bg-gray-200 p-4 rounded-lg shadow">
-            <h3 class="text-xl font-semibold">Upcoming Trips</h3>
-            <p class="text-gray-600"> You have no upcoming trips. </p>
-          </div>
+              <h3 class="text-xl font-semibold">Upcoming Trips</h3>
+              <ul id="confirmedMeetupsList">
+                <li>Loading…</li>
+              </ul>
+            </div>
 
             <div class="bg-gray-200 p-4 rounded-lg shadow">
               <h3 class="text-xl font-semibold">Reviews</h3>
@@ -412,7 +414,10 @@
           <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
             <div class="bg-gray-200 p-4 rounded-lg shadow">
               <h3 class="text-xl font-semibold">Upcoming Tours</h3>
-              <p class="text-gray-600">No tours scheduled yet.</p>
+              <!-- updated ID here so it won't clash with the Travelers tab -->
+              <ul id="confirmedMeetupsListGuides">
+                <li>Loading…</li>
+              </ul>
             </div>
             <div class="bg-gray-200 p-4 rounded-lg shadow">
               <h3 class="text-xl font-semibold">Reviews</h3>
@@ -424,6 +429,30 @@
       </div>
     </div>
   </main>
+<!-- Review Modal -->
+<div id="ratingModal" class="hidden fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
+  <form id="ratingForm" class="bg-white p-6 rounded shadow-md w-96">
+    <h2 class="text-xl font-semibold mb-4">Rate your recent meetup</h2>
+
+    <label class="block mb-2">Stars:</label>
+    <select name="rating" class="w-full border px-2 py-1 mb-4">
+      <option value="">Select rating</option>
+      <option value="5">★★★★★ (5)</option>
+      <option value="4">★★★★☆ (4)</option>
+      <option value="3">★★★☆☆ (3)</option>
+      <option value="2">★★☆☆☆ (2)</option>
+      <option value="1">★☆☆☆☆ (1)</option>
+    </select>
+
+    <label class="block mb-2">Comments:</label>
+    <textarea id="ratingComment" rows="4" class="w-full border px-2 py-1 mb-4" placeholder="Optional feedback…"></textarea>
+
+    <div class="flex justify-end space-x-2">
+      <button type="button" id="ratingCancel" class="bg-gray-300 px-3 py-1 rounded">Cancel</button>
+      <button type="submit" class="bg-blue-500 text-white px-3 py-1 rounded">Submit</button>
+    </div>
+  </form>
+</div>
 
   <!-- Footer -->
   <footer class="flex-none text-center p-4 bg-white shadow">

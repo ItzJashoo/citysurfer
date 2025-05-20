@@ -1,12 +1,13 @@
+// src/dashboard/index.js
+
 import '../css/styles.css';
 import { btnLogout } from './ui.js';
 
-// ——— Import your single-source Firebase instances ———
+// ——— Firebase instances ———
 import { auth, db } from '../firebase.js';
-
 import {
   signOut,
-  onAuthStateChanged,
+  onAuthStateChanged
 } from 'firebase/auth';
 import {
   doc,
@@ -15,7 +16,12 @@ import {
   collection,
   query,
   where,
-  getDocs
+  getDocs,
+  setDoc,
+  onSnapshot,
+  orderBy,
+  addDoc,
+  Timestamp
 } from 'firebase/firestore';
 
 // ——— Logout ———
@@ -102,7 +108,8 @@ onAuthStateChanged(auth, async user => {
   if (inboxBadge) {
     try {
       const messagesRef = collection(db, 'messages');
-      const q = query(messagesRef,
+      const q = query(
+        messagesRef,
         where('to', '==', user.uid),
         where('read', '==', false)
       );
@@ -123,7 +130,7 @@ onAuthStateChanged(auth, async user => {
 
     try {
       const yourSnap = await getDoc(doc(db,'users',user.uid));
-      const home = yourSnap.exists() ? yourSnap.data().homelocation : null;
+      const home = yourSnap.exists() ? yourSnap.data().location : null;
       if (!home) {
         ul.innerHTML = '<li>You have no home location set.</li>';
       } else {
@@ -132,7 +139,7 @@ onAuthStateChanged(auth, async user => {
         ul.innerHTML = '';
         let count = 0;
         results.forEach(ds => {
-          if (ds.id === user.uid) return; // skip yourself
+          if (ds.id === user.uid) return;
           const d = ds.data();
           const name = d.name || d.email || 'Unnamed';
 
@@ -190,4 +197,144 @@ onAuthStateChanged(auth, async user => {
       console.error('Error loading inbox:', err);
     }
   }
+
+ 
+  // ——— Confirmed Meetups (both tabs) ———
+  const listIds = ['confirmedMeetupsList', 'confirmedMeetupsListGuides'];
+  const confirmedLists = listIds
+    .map(id => document.getElementById(id))
+    .filter(el => el);
+  const confirmedCache = {};
+
+  const qToMe = query(
+    collection(db, 'meetupRequests'),
+    where('to', '==', user.uid),
+    where('status', '==', 'accepted'),
+    orderBy('timestamp', 'asc')
+  );
+  const qFromMe = query(
+    collection(db, 'meetupRequests'),
+    where('from', '==', user.uid),
+    where('status', '==', 'accepted'),
+    orderBy('timestamp', 'asc')
+  );
+
+  function renderConfirmed() {
+    const meetings = Object.values(confirmedCache)
+      .sort((a, b) => a.timestamp.toMillis() - b.timestamp.toMillis());
+    confirmedLists.forEach(ul => {
+      ul.innerHTML = meetings.length
+        ? meetings.map(r => `<li>${r.date} @ ${r.time}, ${r.address}</li>`).join('')
+        : '<li>No confirmed meetups.</li>';
+    });
+  }
+
+  onSnapshot(qToMe, snap => {
+    snap.forEach(d => { confirmedCache[d.id] = d.data(); });
+    renderConfirmed();
+    checkForReviewPrompt();
+  });
+  onSnapshot(qFromMe, snap => {
+    snap.forEach(d => { confirmedCache[d.id] = d.data(); });
+    renderConfirmed();
+    checkForReviewPrompt();
+  });
+
+  // ——— Rating Modal Logic ———
+  const ratingModal   = document.getElementById('ratingModal');
+  const ratingForm    = document.getElementById('ratingForm');
+  const ratingCancel  = document.getElementById('ratingCancel');
+  const messagesModal = document.getElementById('messagesModal');
+  const closeMessages = document.getElementById('closeMessagesModal');
+  let pendingReview   = null;
+  let reviewQueue     = false;
+
+  // When chat modal closes, trigger review if queued
+  closeMessages?.addEventListener('click', () => {
+    if (reviewQueue) {
+      ratingModal.classList.remove('hidden');
+      reviewQueue = false;
+    }
+  });
+
+  function checkForReviewPrompt() {
+    if (!ratingModal) return;
+    const today = new Date();
+    const yesterday = new Date(today);
+    yesterday.setDate(today.getDate() - 1);
+    const cutoff = yesterday.toISOString().slice(0,10);
+
+    for (const [meetupId, data] of Object.entries(confirmedCache)) {
+      if (data.date > cutoff) continue;
+      const otherUid = data.participants.find(uid => uid !== user.uid);
+      if (!otherUid) continue;
+
+      const key = `${meetupId}_${user.uid}`;
+      window._reviewChecked = window._reviewChecked || {};
+      if (window._reviewChecked[key]) continue;
+      window._reviewChecked[key] = true;
+
+      promptReviewIfNeeded(meetupId, otherUid);
+      return;
+    }
+  }
+
+  async function promptReviewIfNeeded(meetupId, otherUid) {
+    const q = query(
+      collection(db, 'meetupReviews'),
+      where('meetupId', '==', meetupId),
+      where('reviewer', '==', user.uid)
+    );
+    const res = await getDocs(q);
+    if (res.empty && ratingModal) {
+      pendingReview = { meetupId, otherUid };
+
+      if (messagesModal && !messagesModal.classList.contains('hidden')) {
+        reviewQueue = true;
+      } else {
+        ratingModal.classList.remove('hidden');
+      }
+    }
+  }
+
+  ratingCancel?.addEventListener('click', () => {
+    ratingModal.classList.add('hidden');
+    pendingReview = null;
+  });
+
+  ratingForm?.addEventListener('submit', async e => {
+    e.preventDefault();
+    if (!pendingReview) return;
+
+    const form = new FormData(ratingForm);
+    const rating = Number(form.get('rating'));
+    const comment = document.getElementById('ratingComment').value.trim();
+    if (!rating || rating < 1 || rating > 5) {
+      return alert('Select 1–5 stars.');
+    }
+
+    // 1) Create permission doc
+    const permId = `${pendingReview.meetupId}_${user.uid}`;
+    await setDoc(doc(db, 'meetupReviewPermissions', permId), {
+      meetupId: pendingReview.meetupId,
+      reviewer: user.uid,
+      reviewee: pendingReview.otherUid,
+      created: Timestamp.now()
+    });
+
+    // 2) Now create the review
+    await addDoc(collection(db, 'meetupReviews'), {
+      meetupId: pendingReview.meetupId,
+      reviewer: user.uid,
+      reviewee: pendingReview.otherUid,
+      rating,
+      comment,
+      timestamp: Timestamp.now()
+    });
+
+    ratingModal.classList.add('hidden');
+    pendingReview = null;
+    alert('Thanks for your feedback!');
+  });
+
 });
